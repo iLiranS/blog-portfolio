@@ -1,0 +1,58 @@
+---
+title: "Laser Defense: 04-intercepting"
+publishedAt: "2025-11-24"
+summary: "Part 4 of the laser-defense system project guide"
+---
+This is the fourth and last part of the guide and after this section we will have a fully working simulation.
+
+- (except for user friendly UI/UX which is up to you to bring)
+
+We will use a rather simple algorithm for detection of the missiles, and using the existing curve we created in the last section, it will make our life a lot easier.
+
+As you’ll see it’s not the most efficient algorithm as it’s polynomial in theory but linear in practice.
+
+<br/>
+
+### The Algorithm idea
+
+we have every interceptor location at a given time using the state manager, we will need to set a “detection radius” to the interceptors (in my case it’s unified value),  we also have every missile path (curve).
+
+Every missile has 2 options of “fate” - being intercepted or landing on earth.
+
+Because the missile path is deterministic we will use Predictive Sampling approach.
+
+We will declare -  t in [0,1] representing the position of the missile t * 100 percent of the path - which we have access to with `curve.getPoint(t, currentPoint);` 
+
+so let’s take 100 samples , so we will check the position at 1%,2%,… of the path.
+
+then, for each sample - we will iterate over all the interceptors and check :
+
+if dist(p,i) ≤R then we found an interception match !
+
+- ’p’ representing our point and ‘i’ represents the interceptor while ‘R’ is it’s detection radius
+
+we return “no match” if we iterate over all the samples for all interceptors and find nothing.
+
+Now, because we check in ascending samples order - the first match is guaranteed to be the first interceptor the missile travels through it’s detection radius.
+
+The time complexity is O(n⋅m), where n is the number of samples and m is the number of interceptors. Since both n (≈100) and m (typically < 50) are small, the algorithm behaves effectively **linearly in practice**. 
+
+We run this algorithm **once** per each missile at creation (or launch) and determine it’s fate.
+
+You can see the full implementation [here](https://github.com/iLiranS/Laser-Defense-Simulation/blob/main/src/objects/missile/utils/calculateMissileFate.ts "https://github.com/iLiranS/Laser-Defense-Simulation/blob/main/src/objects/missile/utils/calculateMissileFate.ts")
+
+<br/>
+
+### How to use it
+
+we only need to calculate the fate once, and we need the curve for it - so the best place would be using `useEffect` in `ArcLine`component - the algorithm requires : `(curve, interceptors, samples, detectionRadius)` which we are going to get through props from Missile component.
+
+<br/>
+
+### That’s it 🥳
+
+I never wrote a guide before so I hope you managed to understand and implemented similar results or your desired ones.
+
+Some little extra tips : combine radius helper (with InstancedMesh) ,random locations and some post processing and we will get this result :
+
+![](/blog/04-intercepting/image.webp)

@@ -1,0 +1,66 @@
+---
+title: 'Laser Defense : 03-missiles-paths'
+publishedAt: '2025-11-24'
+summary: 'Part 3 of the laser-defense system project guide'
+---
+This is part 3 of the guide, I will represent here the algorithm I came up with for the missiles path, how to animate trajectory and make a mesh follow the path, It’s a little math heavy 😵‍💫 but I will try to keep it as simple as possible.
+
+
+### The approach
+
+We will take the approach of Kinematic movement and not real physics based with gravity and so on..
+
+The reasons will be to keep the app simple as visual simulator and not physical simulator, and the fact that the missiles path is deterministic. It will also help with the performance - we will calculate the path on creation once and will use this path later on.
+
+
+### The Algorithm
+
+We will have a **source** and a **target** points represented as Vector3 of their positions.
+
+Simply drawing a line or curve between them is not an option - as the curve will go inside the sphere, so instead we will create a special curve type called `CubicBezierCurve3` - which takes as arguments a source and target, on top of 2 control points that we will use to “raise” the curve above our sphere.
+
+To do so we will build a function with 3 parameters : `source , target , radius` and it will be enough.
+
+Think of our sphere as a Circle with some big radius - let’s call it circle.
+
+ inside our circle we will have a smaller  (or equal) circle called unit circle, if the radius of our circle is X than the unit circle radius will always be fixed to 1, then on this unit circle we will place normalized directions of the source and target points - they will show the same direction as the source and target but with distance of 1 from the center - hence they are just called directions.
+
+Given those “directions” we can have a unique to unit circle operation and rotate them. we will use this rotation on the **source** direction and add a (25% and 75%) rotation value of the total rotation between our target direction and source direction and thus have 2 new directions which are again points on the unit circle. Finally, we can add some height to those unit circle new directions which will raise them **OVER** our original circle and they will be the 2 controls points the CubizBezier takes.
+
+we raise them over our original circle because it’s not enough to put them on it - we want the “path” to be over our earth and not on it’s surface. we will calculate this height addition according to the distance between the points and the radius.
+
+Here is a little illustration I made to make things (hopefully) more understandable :
+
+![](/blog/03-missiles/image.webp)
+
+Hopefully, you understood the core idea, as for the algorithm steps, they are as follow :
+
+1. Get the normalized directions of the points
+2. Create the actual start and end points on the sphere (by multiplying the normals by the radius)
+3. Calculate `arcHeight` it will be used later.
+4. Quaternion logic - we calculate the `totalRotation` (between source and target) 
+    - it has an edge case - if the source and target points are parallel we will set a fixed value.
+5. Calculate the control points directions - we will [slerp](https://en.wikipedia.org/wiki/Slerp "https://en.wikipedia.org/wiki/Slerp") the quaternion of 25% and 75%, then apply this quaternion to source normal clone.
+6. Scale those control points by multiplying the scalar `arcHeight`.
+
+That’s it for the algorithm ! you can see it’s implementation [here](https://github.com/iLiranS/Laser-Defense-Simulation/blob/main/src/objects/missile/utils/computeArcCurve.ts "https://github.com/iLiranS/Laser-Defense-Simulation/blob/main/src/objects/missile/utils/computeArcCurve.ts").
+
+
+### Make use of the path
+
+the implementation of the missile will be in 3 parts : 
+
+- MissileManager - we will split our rendering parts to two :
+    - Missiles - they will be meshes following the curve , because they have the same geometry and material for every mesh, we will use `InstancedMesh` as in the previous⁠ visuals section.
+    - Curves - we will render 2 curves : the first one shows the actual progress, while the other is overall dashed prediction curve of the missile path.
+- Missile - called from the manager and handles stuff like the speed calculation based on distance between source and target, calling an animation of a “laser” if intercepted, and calling ArcLine with the proper props.
+- ArcLine - will render the actual lines, calculate the fate of the missile, and update the progress visuals on each frame.
+    - will also handle updating the instancedMesh actual missile mesh location.It’s a little unintuitive, but as we don’t want to calculate progress multiple times it’s a nice workaround  to save some calculation time.
+
+Combining those 3 components above we will get our desired final result of a missile with a trajectory, fate and visual updates.
+
+> I did not cover the actual implementation of those components but feel free to check it out [here](https://github.com/iLiranS/Laser-Defense-Simulation/tree/main/src/objects/missile "https://github.com/iLiranS/Laser-Defense-Simulation/tree/main/src/objects/missile")
+> 
+> Also we did not actually implement yet the missile fate algorithm - we will do it in the next section.
+
+<br/>

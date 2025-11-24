@@ -11,21 +11,18 @@ export async function generateStaticParams() {
   }))
 }
 
-export function generateMetadata({ params }) {
-  let post = getBlogPosts().find((post) => post.slug === params.slug)
-  if (!post) {
-    return
-  }
 
-  let {
-    title,
-    publishedAt: publishedTime,
-    summary: description,
-    image,
-  } = post.metadata
-  let ogImage = image
-    ? image
-    : `${baseUrl}/og?title=${encodeURIComponent(title)}`
+export async function generateMetadata({ params }) {
+  // params is a Promise in the App Router; await it
+  const { slug } = await params
+
+  const post = getBlogPosts().find((p) => p.slug === slug)
+  if (!post) return {}
+
+  const { title, publishedAt: publishedTime, summary: description, image } =
+    post.metadata
+
+  const ogImage = image ? image : `${baseUrl}/og?title=${encodeURIComponent(title)}`
 
   return {
     title,
@@ -36,11 +33,7 @@ export function generateMetadata({ params }) {
       type: 'article',
       publishedTime,
       url: `${baseUrl}/blog/${post.slug}`,
-      images: [
-        {
-          url: ogImage,
-        },
-      ],
+      images: [{ url: ogImage }],
     },
     twitter: {
       card: 'summary_large_image',
@@ -51,9 +44,10 @@ export function generateMetadata({ params }) {
   }
 }
 
-export default function Blog({ params }) {
-  let post = getBlogPosts().find((post) => post.slug === params.slug)
 
+export default async function Blog({ params }) {
+  const { slug } = await params
+  const post = getBlogPosts().find((post) => post.slug === slug)
   if (!post) {
     notFound()
   }
@@ -93,6 +87,8 @@ export default function Blog({ params }) {
       <article className="prose">
         <CustomMDX source={post.content} />
       </article>
+
     </section>
+
   )
 }
