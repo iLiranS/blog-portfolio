@@ -1,0 +1,46 @@
+---
+title: "RealTime 1v1 Quiz"
+publishedAt: "2023-10-17"
+summary: "How I built a real-time 1v1 vocabulary quiz using Supabase Presence"
+---
+
+![](/blog/realtime-1v1/image.webp)
+
+## About the project
+
+I built a small hobby project aimed at improving Hebrew–English vocabulary through a real-time 1v1 quiz. The idea was simple: two players join a match and pick the correct translation from several options. The first working prototype turned out fun and surprisingly challenging to build.
+
+## The tools I used
+
+The project runs on React and Next.js.  
+To keep both players in sync, I needed a real-time shared state — for that, I used **Supabase Presence**. It allowed both players to see updates instantly without building my own WebSocket server.
+
+## Process
+
+1. When a player clicks “find a match”, a route handler searches the database for an available room with only one player who hasn’t started yet (tracked by a *stage* field). If found, the new player joins that room and is redirected to the duel page.
+
+2. Once two players enter a room, the first player updates the match *stage* to `1`, meaning the game starts.
+
+3. Each round follows a cycle:  
+   Both players answer the question. When both answers arrive (or the timer ends), the game checks their results. If someone answered incorrectly, the *winners* array updates. If both are correct or wrong at the same time, both may get points.
+
+4. At the end of the match, the host player sends the final *winners* array. The route handler decides whether it’s a single-winner or multi-winner scenario and assigns points accordingly.
+
+
+### **Syncing the round state**
+Keeping both players aligned on the current round required a lot of adjustments. The cycle system eventually made it consistent enough for real-time play.
+
+### **Detecting a player leaving**
+Supabase provides a leave hook, but it triggered on every state change, which wasn’t helpful.  
+So I built my own approach:
+
+- I monitored the count of shared state keys. If it dropped to `1`, someone disconnected.
+- But disconnections can be temporary, so I added a timeout. The remaining player gets a “waiting” timer, and if the missing player doesn’t return before it ends, the remaining player wins.
+- If the other player reconnects, the cleanup logic cancels the timer.
+
+### **Cleaning empty rooms**
+If the last player leaves, a `beforeUnload` event fires and calls a route handler to remove the empty room from the database.
+
+## Conclusion
+
+The system isn’t perfect, but it works surprisingly well for a small real-time multiplayer experience. It taught me a lot about syncing live users, handling disconnects, and building state-driven game flows — and it ended up being a fun project to build.
