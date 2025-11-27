@@ -2,20 +2,19 @@ import Link from 'next/link'
 import { formatDate, getBlogPosts } from 'app/blog/utils'
 
 const BlogPosts: React.FC<{ amount?: number }> = ({ amount }) => {
-  let allBlogs = getBlogPosts()
+  let allBlogs = getBlogPosts().sort((a, b) => {
+    if (
+      new Date(a.metadata.publishedAt) > new Date(b.metadata.publishedAt)
+    ) {
+      return -1
+    }
+    return 1
+  })
   if (amount) allBlogs = allBlogs.slice(0, amount)
 
   return (
     <div>
       {allBlogs
-        .sort((a, b) => {
-          if (
-            new Date(a.metadata.publishedAt) > new Date(b.metadata.publishedAt)
-          ) {
-            return -1
-          }
-          return 1
-        })
         .map((post) => (
           <Link
             key={post.slug}

@@ -1,0 +1,86 @@
+---
+title: "FREE Raycast AI using PerplexityAPI (student guide)"
+publishedAt: "2025-11-27"
+summary: "learn how to use raycast ai for free as a student with perplexity pro"
+---
+
+## VALID UNTIL December 9, 2025 !
+(or longer? until perplexity offers ends)
+
+## Introduciton
+Recently, Google released a 12-month free Gemini Pro plan for students — and shortly after, Perplexity followed with something similar: Perplexity PRO for students.
+The best part? Unlike Gemini, this one includes $5/month in Perplexity API credits, giving you enough room to build, tinker, and integrate AI wherever you want.
+<br/>In this post I’ll show you how to plug Perplexity into Raycast Ask AI completely free, plus the config I use and the approximate cost per request.
+## 1. Get Your API Key
+Search for Perplexity Student Program and register through SheerID using your university email.
+Once approved, you’ll get Perplexity PRO automatically — make sure to cancel the subscription immediately so it won’t renew later. You’ll still keep the year-long access.
+Then head to the [Perplexity API key page](https://www.perplexity.ai/account/api/keys) and generate a key.
+(Do not share it — treat it like a password.)
+
+## 2. Activate Raycast custom providers
+Open Raycast → Settings → AI → enable Custom Providers.
+Scroll slightly up afterward and click Reveal Providers Config.
+![](/blog/06-perplexity/image.webp)
+Rename the template file to: : `providers.yaml`
+
+## 3. Creating our model provider
+Now we’ll connect the Perplexity API to Raycast.
+Below is the configuration I use — it keeps responses fast and the cost extremely low (≈ $0.0057 per request → ~900 requests per month with the free credit).
+
+You’re free to tweak it based on your needs.
+The most important cost-related fields are: <br/>
+`max_tokens` : Maximum output length → Lower = cheaper. <br/>
+`context` : Token window / memory → Lower = cheaper. <br/>
+`search_context_size` : Depth of web lookup → **Biggest impact** on cost
+
+
+```
+providers:
+  - id: Perplexity
+    name: PerplexityAPI
+    base_url: https://api.perplexity.ai
+    api_keys:
+      perplexity: # Your API key
+
+    # Parameters to keep costs low and answers quick
+    additional_parameters:
+      return_images: false
+      max_tokens: 1024
+      temperature: 0.2
+      # This block explicitly enables the search API for each call.
+      web_search_options:
+        enabled: true
+        search_context_size: low 
+
+    models:
+      - id: sonar
+        name: Sonar (Budget Web)
+        provider: perplexity
+        description: Perplexity's fast, cost-effective model with real-time web access.
+        context: 8192 # Keep context low to save on input token costs
+        
+        abilities:
+          temperature:
+            supported: true
+          vision:
+            supported: false
+          system_message:
+            supported: true
+          tools:
+            supported: false
+          reasoning_effort:
+            supported: false
+```
+## 4. Using the provider
+Once the provider file is saved correctly:
+1. Open Raycast → Settings → AI
+2. Under Quick AI Model, select Sonar (Budget Web) (or whatever name you set)
+3. Start chatting — you’re now running Perplexity inside Raycast for free
+
+## And you’re done 🎉
+
+You now have a fully working Raycast AI setup powered by Perplexity — no local LLMs, no monthly cost, just free API credits fueling daily usage.
+
+If Raycast fails to detect the config, double-check indentation (YAML is strict), ensure the file is named providers.yaml, and verify your API key is correct.
+
+Happy building — and enjoy your free year of AI. 🚀
