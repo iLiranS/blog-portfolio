@@ -33,7 +33,7 @@ export function MdxTable(props) {
 export function MdxTh(props) {
     return (
         <th
-            className="bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200"
+            className="bg-gray-50 dark:bg-neutral-800 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider border-b border-gray-200"
             {...props}
         />
     );
@@ -42,7 +42,7 @@ export function MdxTh(props) {
 export function MdxTd(props) {
     return (
         <td
-            className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 border-b border-gray-200"
+            className="px-6 py-4 whitespace-nowrap text-sm opacity-80  border-b border-gray-200"
             {...props}
         />
     );
