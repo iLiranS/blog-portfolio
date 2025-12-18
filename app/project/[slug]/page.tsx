@@ -1,10 +1,10 @@
 import { notFound } from 'next/navigation'
 import { CustomMDX } from 'app/components/mdx'
-import { formatDate, getBlogPosts } from 'app/blog/utils'
+import { formatDate, getProjectPosts } from 'app/blog/utils'
 import { baseUrl } from 'app/sitemap'
 
 export async function generateStaticParams() {
-  let posts = getBlogPosts()
+  let posts = getProjectPosts()
 
   return posts.map((post) => ({
     slug: post.slug,
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }) {
   // params is a Promise in the App Router; await it
   const { slug } = await params
 
-  const post = getBlogPosts().find((p) => p.slug === slug)
+  const post = getProjectPosts().find((p) => p.slug === slug)
   if (!post) return {}
 
   const { title, publishedAt: publishedTime, summary: description, image } =
@@ -32,7 +32,7 @@ export async function generateMetadata({ params }) {
       description,
       type: 'article',
       publishedTime,
-      url: `${baseUrl}/blog/${post.slug}`,
+      url: `${baseUrl}/project/${post.slug}`,
       images: [{ url: ogImage }],
     },
     twitter: {
@@ -45,9 +45,9 @@ export async function generateMetadata({ params }) {
 }
 
 
-export default async function Blog({ params }) {
+export default async function Project({ params }) {
   const { slug } = await params
-  const post = getBlogPosts().find((post) => post.slug === slug)
+  const post = getProjectPosts().find((post) => post.slug === slug)
   if (!post) {
     return notFound()
   }
@@ -60,7 +60,7 @@ export default async function Blog({ params }) {
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             '@context': 'https://schema.org',
-            '@type': 'BlogPosting',
+            '@type': 'projectPosting',
             headline: post.metadata.title,
             datePublished: post.metadata.publishedAt,
             dateModified: post.metadata.publishedAt,
@@ -68,7 +68,7 @@ export default async function Blog({ params }) {
             image: post.metadata.image
               ? `${baseUrl}${post.metadata.image}`
               : `/og?title=${encodeURIComponent(post.metadata.title)}`,
-            url: `${baseUrl}/blog/${post.slug}`,
+            url: `${baseUrl}/project/${post.slug}`,
             author: {
               '@type': 'Person',
               name: 'My Portfolio',

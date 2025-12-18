@@ -1,5 +1,6 @@
 import BlogPosts from 'app/components/posts'
 import Footer from './components/footer'
+import ProjectPosts from './components/projects'
 
 
 export default function Page() {
@@ -19,8 +20,7 @@ export default function Page() {
         </div>
         <div className="my-8">
           <h2 className='text-xl my-2'>Recent Projects</h2>
-          <p className='text-gray-400'>{`Work In Progress...`}</p>
-          <p className='text-gray-400'>{`You can see most of them in my github profile for now 🫠`}</p>
+          <ProjectPosts amount={3} />
         </div>
         <Footer />
       </section>

@@ -1,4 +1,3 @@
-
 import fs from 'fs'
 import path from 'path'
 
@@ -52,6 +51,9 @@ function getMDXData(dir) {
 
 export function getBlogPosts() {
   return getMDXData(path.join(process.cwd(), 'app', 'blog', 'posts'))
+}
+export function getProjectPosts() {
+  return getMDXData(path.join(process.cwd(), 'app', 'project', 'projects'))
 }
 
 export function formatDate(date: string, includeRelative = false) {

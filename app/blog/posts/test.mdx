@@ -1,0 +1,55 @@
+---
+title: 'Blog MDX reader'
+publishedAt: '2025-12-18'
+summary: 'A quick overview of the new blog system: richer code blocks, tables, and full LaTeX support.'
+---
+
+## Introduction
+
+The blog system has been upgraded to make technical posts cleaner, clearer, and more enjoyable to read.  
+It supports **better code blocks**, **native tables**, and **full LaTeX support** — all rendered directly from MDX.
+Possible thanks to [next-mdx-remote-client](https://github.com/ipikuka/next-mdx-remote-client#readme), with plugins
+of [rehype plugins](https://github.com/rehypejs/rehype) alongside some customization.
+
+
+
+## Tables Support
+
+| Item                | Category        | Value | Rating |
+|---------------------|-----------------|-------|--------|
+| **Clockwork Owl**   | Gadgets         | 73    | ★★★★☆ |
+| Lunar Tea Leaves    | Consumables     | 18    | ★★★☆☆ |
+| Neon Paper Clips    | Office Stuff    | 42    | ★★★★★ |
+| Pocket Sundial      | Curiosities     | 55    | ★★★☆☆ |
+| Floating Bookmark   | Miscellaneous  | 29    | ★★★★☆ |
+
+
+
+## Code blocks (with line numbers & highlights)
+
+```js showLineNumbers {2,5}
+function fibonacci(n) {
+  if (n <= 1) return n;
+
+  let a = 0, b = 1;
+  for (let i = 2; i <= n; i++) {
+    [a, b] = [b, a + b];
+  }
+
+  return b;
+}
+```
+## Math & LaTeX
+Inline math works naturally, for example:
+$a = b + c$
+
+Standalone equations:
+$$
+\begin{align*}
+F(0) &= 0 \\
+F(1) &= 1 \\
+F(2) &= F(n-1) + F(n-2) \; , \; n\ge 2
+
+\end{align*}
+$$
+This makes it easy to write about algorithms, math, or anything slightly more formal without hacks.

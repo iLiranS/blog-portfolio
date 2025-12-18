@@ -16,7 +16,7 @@ Tech stack : React (R3F + Drei) , Zustand , TailwindCSS - we will also use TypeS
 
 The **FOLDERS** structure will follow this example. (inside each folder there will be either nested folders or files)
 
-```
+```md
 /
 ├── public
 ├── src
@@ -46,7 +46,7 @@ Now for the “experience” itself - we will wrap those in `<Suspense>` with a
 
 - as their names indicates you probably know what those components responsibility is.
 
-```
+```tsx
 <Suspense fallback={<EarthPlaceholder radius={radius} />}>
     <Atmosphere />
     <Earth />
@@ -75,7 +75,7 @@ But we don’t want click events yet. (we will leave that for the GUI part)
 
 For now we will generate random position according to given radius so here is a basic function to do that for example with random interceptors :
 
-```
+```tsx
 const getRandomInterceptors = (count: number, radius: number) => {
     const interceptors: Interceptor[] = Array.from({ length: count }, () => {
         const res = randomPointOnSphere(radius)
@@ -90,7 +90,7 @@ but we need to implement `randomPointOnSphere` , we’ll do it the traditional 
 - Basically - we create a random point on the unit circle and push it outwards to match the radius.
 - Three.JS is Y up coordinate as default and not Z-up so we switch between Y ↔ Z
 
-```
+```tsx
 export function randomPointOnSphere(radius: number): [number, number, number] {
     // random angles
     const u = Math.random();

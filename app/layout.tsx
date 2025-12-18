@@ -5,7 +5,7 @@ import { GeistMono } from 'geist/font/mono'
 import { Navbar } from './components/nav'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
-import Footer from './components/footer'
+import 'katex/dist/katex.min.css';
 import { baseUrl } from './sitemap'
 
 export const metadata: Metadata = {

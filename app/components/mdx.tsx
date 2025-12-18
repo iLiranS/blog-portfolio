@@ -1,31 +1,15 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { MDXRemote } from 'next-mdx-remote-client/rsc'
-import { highlight } from 'sugar-high'
+import { MDXRemote, MDXRemoteOptions } from 'next-mdx-remote-client/rsc'
 import React from 'react'
+import { InlineCode, MdxTable, MdxTd, MdxTh, Pre, TableOfContents } from './mdx-component'
+import remarkFlexibleToc from "remark-flexible-toc";
+import remarkGfm from "remark-gfm";
+import rehypePrettyCode from "rehype-pretty-code";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 
 
-function Table({ data }) {
-  let headers = data.headers.map((header, index) => (
-    <th key={index}>{header}</th>
-  ))
-  let rows = data.rows.map((row, index) => (
-    <tr key={index}>
-      {row.map((cell, cellIndex) => (
-        <td key={cellIndex}>{cell}</td>
-      ))}
-    </tr>
-  ))
-
-  return (
-    <table>
-      <thead>
-        <tr>{headers}</tr>
-      </thead>
-      <tbody>{rows}</tbody>
-    </table>
-  )
-}
 
 function CustomLink(props) {
   let href = props.href
@@ -49,10 +33,7 @@ function RoundedImage(props) {
   return <Image alt={props.alt} className="rounded-lg" {...props} />
 }
 
-function Code({ children, ...props }) {
-  let codeHTML = highlight(children)
-  return <code dangerouslySetInnerHTML={{ __html: codeHTML }} {...props} />
-}
+
 
 function slugify(str) {
   return str
@@ -96,13 +77,40 @@ let components = {
   h6: createHeading(6),
   Image: RoundedImage,
   a: CustomLink,
-  code: Code,
-  Table,
+  code: InlineCode,
+  pre: Pre,
+  table: MdxTable,
+  th: MdxTh,
+  td: MdxTd,
+  TableOfContents
 }
+const options: MDXRemoteOptions = {
+  mdxOptions: {
+    remarkPlugins: [
+      remarkMath,
+      remarkFlexibleToc,
+      remarkGfm,
+    ],
+    rehypePlugins: [
+      rehypeKatex,
+      [rehypePrettyCode, {
+        theme: 'github-dark',
+        defaultLang: {
+          block: "tsx",
+          inline: "",
+        },
+      }
+      ],
+    ]
+  },
+
+  parseFrontmatter: true,
+  vfileDataIntoScope: "toc",
+};
 
 export function CustomMDX(props) {
   return (
-    <MDXRemote
+    <MDXRemote options={options}
       {...props}
       components={{ ...components, ...(props.components || {}) }}
     />
