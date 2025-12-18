@@ -55,10 +55,7 @@ export function Pre({ children, ...props }) {
 
     const copyToClipboard = async () => {
         if (!preRef.current) return;
-
-        // textContent gets the raw text, ignoring HTML tags and line numbers (if done via CSS)
-        const text = preRef.current.textContent;
-
+        const text = preRef.current.textContent || "";
         try {
             await navigator.clipboard.writeText(text);
             setIsCopied(true);
