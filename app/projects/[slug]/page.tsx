@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { CustomMDX } from 'app/components/mdx'
 import { formatDate, getProjectPosts } from 'app/blog/utils'
 import { baseUrl } from 'app/sitemap'
+import Link from 'next/link'
 
 export async function generateStaticParams() {
   let posts = getProjectPosts()
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }) {
       description,
       type: 'article',
       publishedTime,
-      url: `${baseUrl}/project/${post.slug}`,
+      url: `${baseUrl}/projects/${post.slug}`,
       images: [{ url: ogImage }],
     },
     twitter: {
@@ -45,12 +46,22 @@ export async function generateMetadata({ params }) {
 }
 
 
-export default async function Project({ params }) {
+export default async function Projects({ params }) {
   const { slug } = await params
-  const post = getProjectPosts().find((post) => post.slug === slug)
-  if (!post) {
+  const allPosts = getProjectPosts().sort((a, b) => {
+    if (new Date(a.metadata.publishedAt) > new Date(b.metadata.publishedAt)) {
+      return 1
+    }
+    return -1
+  })
+  const postIndex = allPosts.findIndex((post) => post.slug === slug)
+  if (postIndex === -1) {
     return notFound()
   }
+  const post = allPosts[postIndex]
+  // previous and next links
+  const prevPost = allPosts[postIndex - 1] || null
+  const nextPost = allPosts[postIndex + 1] || null
 
   return (
     <section>
@@ -68,10 +79,10 @@ export default async function Project({ params }) {
             image: post.metadata.image
               ? `${baseUrl}${post.metadata.image}`
               : `/og?title=${encodeURIComponent(post.metadata.title)}`,
-            url: `${baseUrl}/project/${post.slug}`,
+            url: `${baseUrl}/projects/${post.slug}`,
             author: {
               '@type': 'Person',
-              name: 'My Portfolio',
+              name: 'Liran',
             },
           }),
         }}
@@ -88,6 +99,39 @@ export default async function Project({ params }) {
         <CustomMDX source={post.content} />
       </article>
 
+      <hr className="my-8 border-neutral-200 dark:border-neutral-800" />
+
+      <div className="flex justify-between gap-4">
+        {prevPost ? (
+          <Link
+            href={`/projects/${prevPost.slug}`}
+            className="group flex flex-col gap-1 text-left sm:w-1/2"
+          >
+            <span className="text-xs text-neutral-500 uppercase tracking-wider group-hover:text-neutral-700 dark:group-hover:text-neutral-300">
+              ← Previous
+            </span>
+            <span className="font-medium text-neutral-900 dark:text-neutral-100 group-hover:underline">
+              {prevPost.metadata.title}
+            </span>
+          </Link>
+        ) : (
+          <div className="sm:w-1/2" /> /* Spacer if no prev */
+        )}
+
+        {nextPost && (
+          <Link
+            href={`/projects/${nextPost.slug}`}
+            className="group flex flex-col gap-1 text-right sm:w-1/2 items-end"
+          >
+            <span className="text-xs text-neutral-500 uppercase tracking-wider group-hover:text-neutral-700 dark:group-hover:text-neutral-300">
+              Next →
+            </span>
+            <span className="font-medium text-neutral-900 dark:text-neutral-100 group-hover:underline">
+              {nextPost.metadata.title}
+            </span>
+          </Link>
+        )}
+      </div>
     </section>
 
   )

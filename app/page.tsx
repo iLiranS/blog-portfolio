@@ -11,15 +11,14 @@ export default function Page() {
           LiranS
         </h1>
         <p className="mb-2">
-          {`I'm a Full-Stack Web developer 🧑‍💻 and C.S Student 🎓`}
+          {`I'm a Full-Stack Web developer 🧑‍💻 & C.S Student 🎓 who likes building stuff 🚀`}
         </p>
-        <p>{` I like building cool stuff 🚀`}</p>
         <div className="my-8">
-          <h2 className='text-xl my-2'>Recent posts</h2>
+          <h2 className='text-xl my-2 tracking-wide font-medium'>Recent posts</h2>
           <BlogPosts amount={4} />
         </div>
         <div className="my-8">
-          <h2 className='text-xl my-2'>Recent Projects</h2>
+          <h2 className='text-xl my-2 tracking-wide font-medium'>Recent Projects</h2>
           <ProjectPosts amount={3} />
         </div>
         <Footer />

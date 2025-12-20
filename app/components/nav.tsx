@@ -8,7 +8,7 @@ const navItems = {
   '/': {
     name: 'Home',
   },
-  '/project': {
+  '/projects': {
     name: 'Projects'
   },
   '/blog': {
@@ -44,7 +44,7 @@ export function Navbar() {
               )
             })}
           </div>
-          <div onClick={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')} className='grid place-items-center gap-1 border p-1 rounded-md mr-2'>
+          <div onClick={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')} className='grid text-xl cursor-pointer place-items-center gap-1 border p-1 rounded-md mr-2'>
             {mounted ? (theme === 'light' ? <MdOutlineLightMode /> : <MdOutlineDarkMode />) : null}
           </div>
         </nav>
