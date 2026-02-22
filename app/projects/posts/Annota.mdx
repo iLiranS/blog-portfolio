@@ -1,124 +1,157 @@
 ---
-title: 'Annota (WIP)'
-publishedAt: '2026-01-23'
+title: 'Annota - E2E Notes & Tasks App'
+publishedAt: '2026-02-22'
 summary: 'Full Stack Local First Note Taking App'
 ---
-## WIP - Currently Closed Source
-I'm working for the past few weeks on a new note taking app called Annota. <br/>
-Currently it is under heavy development, and I'm using it myself for testing and keep implementation core features.
-The goal of V1.0.0 would be a Local-First mobile app with offline suuports and a Web App for Desktop users.
 ![](/blog/annota/image.webp)
 
 
-## What Works
+Annota is a **local-first, fully offline-capable, end-to-end encrypted note-taking application** built with a security-first architecture and production-grade sync design.
 
-### Notes & Folders
-- Tree-based folder structure with **nested folders and notes**
-- Create, edit, move, and delete notes and folders
-- **Soft delete system** with full restore support
-- Trash view allows browsing deleted folders/notes hierarchically
-- Correct restore logic:
-  - Restores only items deleted with their parent
-  - Preserves notes deleted *before* a folder was deleted
-  - Restores to root if original parent no longer exists
+It combines a powerful rich text editor with a tree-structured knowledge system, encrypted image handling, version history, and deterministic secure sync — all while ensuring the server never sees plaintext data.
 
-### Editor
-- Fast, offline-capable rich text editor (bundled locally via Native web view)
-- Supports:
-  - Headings
-  - Inline formatting (Bold, Italic, Underline, Strikethrough)
-  - Highlighted Code Blocks
-  - Images + Gallery
-  - Tables
-  - Embedded content (e.g. YouTube)
-  - Latex
-  - Lists and Checklists
-  - Highlights and coloring of text
+### Architectural Highlights
 
-
-### Tasks
-- Simple task system
-- Tasks can be:
-  - Assigned to folders
-  - Given due dates
-- Calendar-based task view:
-  - Navigate between months
-  - Select a day to view its tasks
-- Home screen includes:
-  - Calendar
-  - Upcoming tasks (closest future tasks)
-  - Recently edited notes for quick access
-
-### Navigation & UI
-- Sidebar drawer with quick access to:
-  - Home
-  - Notes
-  - Tasks
-  - Trash
-  - Settings
-- Smooth navigation and fast UI interactions
-- Accent color selection with beautiful results
-- App feels responsive and stable in daily use
-
-
-## Architecture
-
-### Data Layer
-- **SQLite (Expo SQLite)** as local database
-- **Drizzle ORM**
-- Separate tables for:
-  - Note metadata
-  - Note content  
-  (to avoid loading heavy content on app startup)
-
-### State Management
-- **Zustand** used as the main controller layer
-- Stores:
-  - Notes & folders (combined store due to tight coupling)
-  - Tasks (separate store)
-- Clear separation between:
-  - Repositories (DB access)
-  - Services (business logic)
-  - State (Zustand)
-
-### App Initialization
-- On app start:
-  - Only metadata is loaded
-  - Note content is loaded lazily when needed
-- Results in faster startup and better performance
+- 🔐 **True End-to-End Encryption** (server sees zero content — including images)
+- 📱 **Local-First & Fully Offline Capable**
+- 🧠 **Deterministic Secure Sync Architecture**
+- 🖼 **Encrypted Image Lifecycle + Garbage Collection**
+- ♻️ Image reference reuse across notes & versions (no duplication)
+- 🗂 Tree-based hierarchical structure
+- 🕓 Local version history system
+- ⚙️ Memory-only decryption with lazy loading
+- 🧹 Garbage collection both locally and in backend storage
+- 🎨 Highly customizable UI & typography settings
 
 
 
-## Known Limitations / Missing Features
+## 📝 Rich Text Editor
 
-These are **intentionally postponed** and not blockers for alpha:
+Built on **TipTap**, integrated via a native mobile WebView.
 
-- Daily Note system
-- Note ↔ note / note ↔ heading linking
-- Collapsible sections / headers
-- Full-text search inside note content  
-  (current search is metadata-only)
-- Advanced editor polish and edge-case fixes
+Supports:
 
-
-
-## Known Issues
-- Minor editor bugs and edge cases
-- Some UI/UX refinements still needed
-- Error handling can be improved in certain flows
-
-
-
-## Out of Scope for This Phase
-- Backend implementation
-- Multi-device sync
-- End-to-end encryption
-- Conflict resolution
-- User accounts / authentication
+- All common inline styles (bold, italic, underline, strike, etc.)
+- Custom code block highlighting
+- LaTeX rendering
+- YouTube video embedding
+- Tables
+- Image uploading via:
+  - Device library
+  - Camera
+  - Pasting
+  - Image URL (downloaded and stored locally)
+- Theme-aware rendering injected into the WebView
 
 
 
-## Next Milestones (Alpha Release)
-- Fully Working Backend + Sync + E2E + Authentication + Authorization
-- Editor polish and UX improvements
-- Limited Usage for Testers
+## 🌳 Tree-Based Notes & Folders
+
+- Infinite nested folder structure
+- Clean hierarchical navigation
+- Soft delete system with restore capability
+- Designed for scalable knowledge organization
+
+
+
+## 🕓 Version History (Local)
+
+- Version snapshots stored locally
+- Lightweight and storage-aware
+- Designed to integrate seamlessly with encryption
+- Allows recovery of previous states without server-side exposure
+
+
+
+## 🔐 End-to-End Encryption
+
+Annota is built around a strict encryption model:
+
+- All note content encrypted client-side
+- All images encrypted client-side
+- Server stores only encrypted blobs
+- Only minimal metadata stored (ID & timestamps)
+- Decryption occurs **in memory only**
+- Lazy loading of encrypted content
+- Zero plaintext persistence on server
+
+
+
+## 🔑 Key Management
+
+- 12-word recovery phrase generation
+- Secure account recovery flow
+- Deterministic key restoration across devices
+- No key material stored server-side
+
+## 🔄 Secure Sync Design
+
+- Deterministic sync architecture
+- Replace-based conflict-safe updates
+- Server acts purely as encrypted storage
+- Designed to avoid data leakage by structure
+
+## 🖼 Image System
+
+- Client-side encrypted image storage
+- Images reused via referencing instead of duplication across:
+  - Multiple notes
+  - Multiple versions
+- Encrypted uploads to backend storage
+- Local and backend garbage collection:
+  - Orphaned image cleanup
+  - Reference tracking system
+- Download support for images
+
+
+
+## 🗄 Backend Architecture
+
+### Database Design
+
+- Encrypted notes storage
+- Encrypted image storage
+- Image-reference mapping
+- Soft delete flags
+- Minimal metadata storage
+- Version history stored locally (not server-side)
+
+
+
+## 📊 Storage Awareness
+
+- Storage size debugging tools
+- Version-aware data considerations
+- Designed to prevent unnecessary duplication
+- Conscious encrypted blob management
+
+
+
+## 🎨 User Settings
+
+- Theme switching
+- Font selection
+- Font size control
+- Line spacing control
+- Compact mode
+- Editor-aware typography customization
+
+
+
+## 📱 Platform
+
+- Native mobile application
+- WebView-based rich editor integration
+- Designed with future desktop support in mind
+
+
+
+## 🚀 Roadmap
+
+- 🖥 Desktop application (Tauri/Electron)
+- UI & UX polishing
+- Home screen widgets
+- Note templates
+- Tag system
+- Performance optimizations
+- And more to come…
