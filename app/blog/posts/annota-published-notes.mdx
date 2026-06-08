@@ -1,0 +1,67 @@
+---
+title: "Architecture Walkthrough: Annota Public Notes"
+publishedAt: "2026-06-08"
+summary: "How I built the public notes feature for Annota"
+---
+
+## Architecture Walkthrough: Annota Public Notes
+
+**System Objective:** To allow premium users to securely publish specific, E2EE local notes to the public web ([annota.online](http://annota.online)) with instant cache invalidation, while maintaining strict backend authorization limits and zero database exposure to the frontend.
+
+### 1\. Client-Side State & Synchronization 
+
+*   **Metadata Tracking**: The local SQLite database tracks two fields in the note metadata: `is_published` (a boolean indicating the user's intended publishing state) and `publish_updated_at` (a local timestamp recording when the user last explicitly triggered a publish/update action).
+    
+*   **The Dirty Sync Queue**: When a user publishes, unpublishes, or edits a note, the local client marks the note as `isDirty`.
+    
+*   **Execution & Conditional Syncing**: After a brief delay, the background sync worker processes the dirty note:
+    
+    *   **Unpublishing**: If the note is deleted or `is_published` is `false` (and `publish_updated_at` is not null), the client sends a `deletePublishedNote` request to the server and resets `publish_updated_at` to `null`.
+        
+    *   **Publishing/Updating**: If `is_published` is `true`, the client only pushes content updates to the server when `publish_updated_at >= updated_at`. This comparison ensures that raw content edits (which bump `updated_at` past `publish_updated_at`) do not automatically sync to the public server until the user explicitly triggers a republish/update.
+        
+    *   **Reversion on Limits**: If the server rejects the publish due to account/plan limits, the client automatically reverts the local state by setting `is_published` to `false`, clearing `is_dirty`, and resetting `publish_updated_at` to `null` to avoid infinite retry loops.
+        
+
+### 2\. Database Layer & Security Constraints (Supabase)
+
+The backend acts as an uncompromising gatekeeper. Public note data is strictly isolated from the core encrypted synchronization tables.
+
+*   **The** `published_notes` **Table:** A dedicated table storing `user_id`, `note_id` (Primary Key), `title`, `md_data` (the raw Markdown), and timestamps.
+    
+*   **Row Level Security (RLS):** Configured so only the authenticated owner can insert, update, or delete their own rows.
+    
+*   **Cascading Cleanups:** Foreign keys dictate that if a user deletes their Annota account (`auth.users`), or if a note is permanently hard-deleted from the system, the corresponding row in `published_notes` is instantly destroyed via `ON DELETE CASCADE`.
+    
+*   **Hard Enforcement Trigger:** A PostgreSQL `BEFORE INSERT` trigger function runs on every attempt to publish. It verifies the user holds an active 'Pro', 'Beta', or 'Admin' role and enforces a strict maximum limit of 50 published notes per user. Free users are blocked entirely at the database level.
+    
+
+### 3\. The Read Pipeline (Data Delivery)
+
+To protect the database from public web traffic, the Next.js frontend never connects to PostgreSQL directly.
+
+*   **The Secure Middleman:** A Supabase Edge Function (`fetch-published-note`) acts as the sole API for reading published content.
+    
+*   **Authorization:** The Edge Function requires a specific `Bearer` token matching a shared secret. It uses the Supabase Service Role key to bypass RLS, fetching the note by ID while strictly filtering out the `user_id` before returning the payload.
+    
+
+### 4\. Rendering & Cache Invalidation (Next.js)
+
+The web frontend is optimized for maximum read performance and zero database strain using Next.js Incremental Static Regeneration (ISR).
+
+*   **The Lazy Load:** When a visitor hits `/notes/[id]` for the first time, Next.js calls the Edge Function, parses the Markdown into HTML using `react-markdown`, and caches the fully built static page. Subsequent visitors are served instantly from the cache.
+    
+*   **Eventual Consistency Fallback:** The page has a default `revalidate: 3600` (1 hour) setting. Even if all webhooks fail, a deleted note will naturally drop from the public web after an hour.
+    
+*   **Instant Cache Eviction (Webhooks):** Supabase database webhooks (`pg_net`) monitor the `published_notes` table. The moment a row is inserted, updated, or deleted, Supabase fires a POST request to a secure Next.js endpoint (`/api/revalidate-note`).
+    
+*   **The 404 State:** The Next.js endpoint verifies the shared secret and executes `revalidatePath` and `revalidateTag`. The cache is instantly wiped. If a note was deleted, the next visitor triggers a fetch, receives a 404 from the Edge Function, and is shown a clean "Not Found" page.
+    
+
+### 5\. Future Roadmap: Media Handling
+
+Images within E2EE notes present a unique challenge, as the server is blind to the encrypted bucket contents.
+
+*   **The Planned Solution:** When a user publishes a note containing images, the local client will intercept the sync. It will decrypt the images locally, upload them to a dedicated, public `published_media` bucket (organized by `/[note_id]/`), and rewrite the Markdown `src` links to point to the public CDN before sending the payload to the database. Upon unpublishing, the client will issue a command to wipe that specific folder.
+    
+*   But that’s a task for another day.

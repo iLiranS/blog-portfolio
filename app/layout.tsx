@@ -55,12 +55,13 @@ export default function RootLayout({
       )}
       suppressHydrationWarning
     >
-      <body className="antialiased max-w-xl sm:mx-auto mb-4  mt-8 mx-4 ">
-        <ThemeProvider attribute='class' defaultTheme="system" enableSystem>
-          <main className="flex-auto min-w-0 mt-6 flex flex-col px-2 md:px-0 ">
+      <body className="antialiased max-w-2xl sm:mx-auto mb-16 mt-10 px-4 sm:px-6">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <main className="flex-auto min-w-0 flex flex-col">
             <Navbar />
-            {children}
-            {/* <Footer /> */}
+            <div className="mt-8 animate-fade-in">
+              {children}
+            </div>
             <Analytics />
             <SpeedInsights />
           </main>

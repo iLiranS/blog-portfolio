@@ -1,141 +1,260 @@
 @import 'tailwindcss';
+@plugin "@tailwindcss/typography";
+@import "katex/dist/katex.min.css";
+
 @variant dark (.dark &);
 
-::selection {
-  background-color: #47a3f3;
-  color: #fefefe;
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card-background: var(--card-background);
+  --color-card-border: var(--card-border);
 }
 
+:root {
+  --background: oklch(0.99 0.003 240);
+  --foreground: oklch(0.22 0.01 240);
+  --border: oklch(0.92 0.005 240);
+  --primary: oklab(58.541% 0.02532 -0.20258);
+  --muted-foreground: oklch(0.55 0.005 240);
+  --card-background: oklch(0.995 0.002 240);
+  --card-border: oklch(0.94 0.005 240);
 
+  /* Atom One Light */
+  --hljs-bg: oklch(0.98 0.003 240);
+  --hljs-color: #383a42;
+  --hljs-comment: #a0a1a7;
+  --hljs-keyword: #a626a4;
+  --hljs-section: #e45649;
+  --hljs-literal: #0184bb;
+  --hljs-string: #50a14f;
+  --hljs-attr: #986801;
+  --hljs-symbol: #4078f2;
+  --hljs-built_in: #c18401;
+}
 
-html {
-  min-width: 320px;
+.dark {
+  --background: oklch(0.12 0.008 240);
+  --foreground: oklch(0.98 0.005 240);
+  --border: oklch(0.24 0.01 240);
+  --primary: oklab(68% 0.018 -0.15);
+  --muted-foreground: oklch(0.65 0.008 240);
+  --card-background: oklch(0.14 0.008 240);
+  --card-border: oklch(0.18 0.01 240);
+
+  /* Atom One Dark */
+  --hljs-bg: oklch(0.14 0.008 240);
+  --hljs-color: #abb2bf;
+  --hljs-comment: #5c6370;
+  --hljs-keyword: #c678dd;
+  --hljs-section: #e06c75;
+  --hljs-literal: #56b6c2;
+  --hljs-string: #98c379;
+  --hljs-attr: #d19a66;
+  --hljs-symbol: #61aeee;
+  --hljs-built_in: #e6c07b;
+}
+
+::selection {
+  background-color: var(--primary);
+  color: var(--background);
 }
 
 @layer base {
   body {
-    @apply bg-white text-black;
-  }
-
-  .dark body {
-    @apply bg-neutral-950 text-neutral-100;
+    @apply bg-background text-foreground antialiased font-sans;
   }
 }
 
-.prose .anchor {
-  @apply absolute invisible no-underline;
-
-  margin-left: -1em;
-  padding-right: 0.5em;
-  width: 80%;
-  max-width: 700px;
-  cursor: pointer;
-}
-
-.anchor:hover {
-  @apply visible;
-}
-
-.prose a {
-  @apply underline transition-all decoration-neutral-400 dark:decoration-neutral-600 underline-offset-2 decoration-[0.1em];
-}
-
-.prose .anchor:after {
-  @apply text-neutral-300 dark:text-neutral-700;
-  content: '#';
-}
-
-.prose *:hover>.anchor {
-  @apply visible;
-}
-
-.prose pre {
-  @apply bg-neutral-50 dark:bg-neutral-900 rounded-lg overflow-x-auto border border-neutral-200 dark:border-neutral-900 py-2 px-3 text-sm;
-}
-
-.prose code {
-  @apply px-1 py-0.5 rounded-lg;
-}
-
-.prose pre code {
-  @apply p-0;
-  border: initial;
-  line-height: 1.5;
-}
-
-.prose code span {
-  @apply font-medium;
-}
-
-.prose img {
-  /* Don't apply styles to next/image */
-  @apply m-0;
-}
-
-.prose p {
-  @apply my-4 text-neutral-800 dark:text-neutral-200;
-}
-
-.prose h1 {
-  @apply text-4xl font-medium tracking-tight mt-6 mb-2;
-}
-
-.prose h2 {
-  @apply text-2xl font-medium tracking-tight mt-6 mb-2;
-}
-
-.prose h3 {
-  @apply text-xl font-medium tracking-tight mt-6 mb-2;
-}
-
-.prose h4 {
-  @apply text-lg font-medium tracking-tight mt-6 mb-2;
-}
-
-.prose strong {
-  @apply font-medium;
-}
-
-.prose ul {
-  @apply list-disc pl-6;
-}
-
-.prose ol {
-  @apply list-decimal pl-6;
-}
-
-.prose> :first-child {
-  /* Override removing top margin, causing layout shift */
-  margin-top: 1.25em !important;
-  margin-bottom: 1.25em !important;
-}
-
+/* Custom scrollbars */
 pre::-webkit-scrollbar {
   display: none;
 }
 
 pre {
   -ms-overflow-style: none;
-  /* IE and Edge */
   scrollbar-width: none;
-  /* Firefox */
 }
 
-/* Remove Safari input shadow on mobile */
-input[type='text'],
-input[type='email'] {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
+/* Rework custom prose elements for smooth markdown styling */
+.prose {
+  @apply max-w-none;
 }
 
-table {
+.prose pre:has(code.hljs) {
+  background-color: var(--hljs-bg);
+  color: var(--hljs-color);
+  border: 1px solid var(--card-border);
+  border-radius: 0.75rem;
+  padding: 0;
+  overflow: hidden;
+  margin: 1.5rem 0;
+}
+
+.prose pre code.hljs {
   display: block;
-  max-width: fit-content;
   overflow-x: auto;
-  white-space: nowrap;
+  padding: 1.25rem;
+  color: var(--hljs-color);
+  background: transparent;
+  font-size: 0.875rem;
+  line-height: 1.7;
 }
 
-.title {
-  text-wrap: balance;
+/* Inline code style */
+.prose :not(pre)>code {
+  @apply px-1.5 py-0.5 rounded bg-muted-foreground/10 text-foreground font-mono text-[0.85em] font-medium;
+  color: var(--foreground);
+}
+
+.prose :not(pre)>code::before,
+.prose :not(pre)>code::after {
+  content: "";
+}
+
+.prose blockquote p:first-of-type::before,
+.prose blockquote p:last-of-type::after {
+  content: "";
+}
+
+.prose a {
+  @apply text-primary no-underline hover:underline font-medium;
+}
+
+/* Table of Contents sidebar */
+.toc-sidebar {
+  @apply sticky top-32 max-h-[70vh] overflow-y-auto pr-4;
+}
+
+/* Math rendering adjustments */
+.katex-display {
+  @apply py-4 my-4 overflow-x-auto;
+}
+
+/* Token highlighting colors */
+.prose .hljs-comment,
+.prose .hljs-quote {
+  color: var(--hljs-comment);
+  font-style: italic;
+}
+
+.prose .hljs-doctag,
+.prose .hljs-keyword,
+.prose .hljs-formula {
+  color: var(--hljs-keyword);
+}
+
+.prose .hljs-section,
+.prose .hljs-name,
+.prose .hljs-selector-tag,
+.prose .hljs-deletion,
+.prose .hljs-subst {
+  color: var(--hljs-section);
+}
+
+.prose .hljs-literal {
+  color: var(--hljs-literal);
+}
+
+.prose .hljs-string,
+.prose .hljs-regexp,
+.prose .hljs-addition,
+.prose .hljs-attribute,
+.prose .hljs-meta .hljs-string {
+  color: var(--hljs-string);
+}
+
+.prose .hljs-attr,
+.prose .hljs-variable,
+.prose .hljs-template-variable,
+.prose .hljs-type,
+.prose .hljs-selector-class,
+.prose .hljs-selector-attr,
+.prose .hljs-selector-pseudo,
+.prose .hljs-number {
+  color: var(--hljs-attr);
+}
+
+.prose .hljs-symbol,
+.prose .hljs-bullet,
+.prose .hljs-link,
+.prose .hljs-meta,
+.prose .hljs-selector-id,
+.prose .hljs-title {
+  color: var(--hljs-symbol);
+}
+
+.prose .hljs-built_in,
+.prose .hljs-title.class_,
+.prose .hljs-class .hljs-title {
+  color: var(--hljs-built_in);
+}
+
+.prose .hljs-emphasis {
+  font-style: italic;
+}
+
+.prose .hljs-strong {
+  font-weight: bold;
+}
+
+.prose img {
+  border-radius: 0.75rem;
+
+}
+
+/* Shimmer/fade keyframes for elegant load animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes text-gradient-move {
+  0% {
+    background-position: 0% center;
+  }
+
+  50% {
+    background-position: 100% center;
+  }
+
+  100% {
+    background-position: 0% center;
+  }
+}
+
+.animate-text-gradient {
+  background-size: 200% auto;
+  animation: text-gradient-move 4s linear infinite;
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up-fade {
+  animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(var(--index, 0) * 0.06s);
 }

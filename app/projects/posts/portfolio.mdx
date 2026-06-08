@@ -1,22 +1,39 @@
 ---
 title: 'Portfolio Website'
-publishedAt: '2025-12-18'
-summary: 'A short overview of my personal portfolio website and its MDX-powered content system.'
+publishedAt: '2026-06-08'
+summary: 'A fast, content-focused personal portfolio website featuring custom MDX rendering, interactive animations, and responsive grids.'
 ---
 
-## Introduction
-
-This website is my personal space to present ideas, experiments, and projects I work on over time. It’s intentionally simple, fast, and content-focused, letting the work speak for itself.
-
+This portfolio website is a personal space designed to display my projects, share experiments, and publish technical articles. The goal was to build a clean, blazing-fast, and visually appealing developer portfolio that lets the work and content stand out.
+![](/blog/portfolio/img.webp)
 
 
-## What you’ll find here
+## 🛠️ Tech Stack
 
-- Project write-ups and experiments  
-- Technical blog posts  
-- Notes about things I’m currently learning  
+- **Framework**: [Next.js](https://nextjs.org/) (App Router & Static Generation)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) & Vanilla CSS variables
+- **Content Engine**: Custom MDX parser with LaTeX and syntax highlighting support
+- **Hosting**: [Vercel](https://vercel.com/) with integrated speed insights
 
-## Portfolio Tech stack
-- React + Next.js (SSR)
-- Tailwind for styling
-- [next-mdx-remote-client](https://github.com/ipikuka/next-mdx-remote-client) with customization for mdx rendering
+---
+
+## 📖 The MDX Content Engine
+
+The heart of the website is a highly customized MDX parsing and rendering engine designed to parse `.mdx` files into interactive HTML pages on-the-fly.
+
+### 🔌 Custom Markdown Processor (`MarkdownRenderer`)
+The renderer combines **ReactMarkdown** with a customized pipeline of remark and rehype plugins:
+- **Math Equations**: Integrated `remark-math` and `rehype-katex` to natively parse and format LaTeX blocks (display equations and inline math formulas) using KaTeX style sheets.
+- **Syntax Highlighting**: Powered by `rehype-highlight` with automatic programming language detection.
+- **Copy-to-Clipboard**: Code blocks are wrapped in a custom `PreWithCopy` component that renders a copy button showing visual feedback states.
+- **Anchor Headings**: Headers (`h2`, `h3`, `h4`) are automatically slugified to generate unique IDs, adding a hoverable `#` anchor link for easy section sharing.
+- **Secure Links**: Auto-detects external links to append `target="_blank"` and `rel="noopener noreferrer"`.
+
+### 📊 Lazy-Loaded Mermaid Diagrams
+- Renders flowcharts and diagrams using **Mermaid.js**.
+- To keep the initial page load lightweight, the `Mermaid` component is loaded using **dynamic client-side imports (`next/dynamic` with `ssr: false`)**.
+- The component dynamically queries the resolved theme from `next-themes` to render light or dark layouts matching the site theme.
+
+### 🧭 Scroll Utilities
+- **Visual Table of Contents**: A sidebar navigation that tracks headings dynamically. It uses an `IntersectionObserver` alongside scroll event fallback mechanisms to highlight the current active heading. It renders a clean dashboard visual where section lines dynamically expand and reveal their titles on hover.
+- **Scroll Progress Indicator**: An optimized scroll depth indicator mounted to `document.body` using a **React Portal**. It animates a high-contrast top-screen bar as the user scrolls down the page.
