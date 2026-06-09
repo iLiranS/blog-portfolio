@@ -55,9 +55,9 @@ export default function RootLayout({
       )}
       suppressHydrationWarning
     >
-      <body className="antialiased max-w-2xl sm:mx-auto mb-16 mt-10 px-4 sm:px-6">
+      <body className="antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <main className="flex-auto min-w-0 flex flex-col">
+          <main className="max-w-3xl mx-auto mb-16 mt-10 px-4 sm:px-6 flex-auto min-w-0 flex flex-col">
             <Navbar />
             <div className="mt-8 animate-fade-in">
               {children}

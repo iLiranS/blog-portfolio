@@ -73,14 +73,10 @@ export function Mermaid({ chart }: MermaidProps) {
 
   return (
     <div
-      className="my-6 flex justify-center overflow-x-auto p-4 rounded-xl bg-muted/10 border border-border/40"
+      className="my-6 overflow-x-auto p-4 rounded-xl bg-muted/10 border border-border/40"
       role="img"
       aria-label="Mermaid diagram"
-    >
-      <div dangerouslySetInnerHTML={{ __html: svg }} />
-      <noscript>
-        <pre className="text-left font-mono text-xs whitespace-pre">{chart}</pre>
-      </noscript>
-    </div>
+      dangerouslySetInnerHTML={{ __html: svg }}
+    />
   )
 }
