@@ -55,7 +55,7 @@ export default function RootLayout({
       )}
       suppressHydrationWarning
     >
-      <body className="antialiased">
+      <body className="subpixel-antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <main className="max-w-3xl mx-auto mb-16 mt-10 px-4 sm:px-6 flex-auto min-w-0 flex flex-col">
             <Navbar />

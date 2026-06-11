@@ -73,7 +73,7 @@ export function Mermaid({ chart }: MermaidProps) {
 
   return (
     <div
-      className="my-6 overflow-x-auto p-4 rounded-xl bg-muted/10 border border-border/40"
+      className="my-6 overflow-x-auto p-4 rounded-xl bg-muted/10 border border-border/40 [&>svg]:mx-auto"
       role="img"
       aria-label="Mermaid diagram"
       dangerouslySetInnerHTML={{ __html: svg }}

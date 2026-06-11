@@ -5,6 +5,8 @@
 @variant dark (.dark &);
 
 @theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Roboto Mono, Menlo, Monaco, Consolas, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-border: var(--border);
@@ -65,7 +67,7 @@
 
 @layer base {
   body {
-    @apply bg-background text-foreground antialiased font-sans;
+    @apply bg-background text-foreground subpixel-antialiased font-sans;
   }
 }
 
@@ -82,6 +84,15 @@ pre {
 /* Rework custom prose elements for smooth markdown styling */
 .prose {
   @apply max-w-none;
+}
+
+.dark .prose strong {
+  color: oklch(0.9 0.005 240);
+}
+
+.dark .prose blockquote {
+  color: oklch(0.8 0.008 240);
+  border-left-color: var(--border);
 }
 
 .prose pre:has(code.hljs) {

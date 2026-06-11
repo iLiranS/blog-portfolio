@@ -42,9 +42,9 @@ When the scheduler determines it's time to upload, `performSyncPush` takes over.
     
 4.  **Tombstones (Soft Deletions)**: If a user deletes a note locally, it is marked as a "tombstone" (`isPermDeleted: true`). We upload this tombstone state to the cloud so other devices know to delete it. Only _after_ the cloud confirms the update do we permanently delete the record and its foreign-key children from the local SQLite database. <span style="color: #757575">(foreign key children are note versions and files links associated with those versions)</span>
     
-5.  **Tracking Files** : each note metadata contains list of files ids it is associated with. When pushed, we check if the synced version is different from the updated note we are about to push, if so - we are replacing `note_files` database row of that note with the updated list and update the metadata also.
+5.  **Tracking Files (Push-Only)**: Each note's metadata contains a list of associated file IDs. When pushed, if the update includes file changes, we replace the `note_files` bridge table rows for that note with the updated file list. Note that this table is *write-only* for the client; it is never queried during the pull flow.
     
-    *   Little more : the note metadata is encrypted so the backend need a way to associate file with notes to determine with its garbage collection if this file is safe to delete later on, that’s what `note_files` is for - it’s the source of truth for the backend of file usage. so behind the scenes : if certain note does not have associated files -> in the garbage collection run we delete the encrypted\_file which contains metadatas for the actual bucket storage file <span style="color: #757575">(also nonce which used to decrypt it)</span> and encrypted\_file is tightly connected to the actual file in the storage.
+> **Backend Garbage Collection**: Because the note contents are end-to-end encrypted, the backend cannot scan the notes to determine which files are still active. The `note_files` table acts as the backend's source of truth for file references. When a file is unreferenced across all notes (e.g. after a note update or deletion), a backend garbage collection process safely purges the orphaned `encrypted_files` metadata records and their corresponding storage bucket objects.
         
 
 ### Step 3: The Pull Flow (Cloud -> Local)
@@ -64,15 +64,17 @@ Files (images, PDFs) require a completely distinct flow because of their size an
 
 ```mermaid
 graph TD
-    A[Fetched New Notes] --> B[Fetch File Links from cloud]
-    B --> C{Compare vs Local DB}
-    C -->|File already on device| D[Skip Download]
-    C -->|File missing locally| E[Fetch Encrypted Metadata]
-    E --> F[Persist to Download Queue]
-    F --> G[Process Queue]
+    A[Fetched & Decrypted Notes] --> B[Extract File IDs from Content]
+    B --> C[Compare with Last Local Version]
+    C -->|Files changed/added| D{Check Local SQLite}
+    C -->|No file changes| E[Skip Download]
+    D -->|File already on device| E
+    D -->|File missing locally| F[Fetch Encrypted Metadata]
+    F --> G[Persist to Download Queue]
+    G --> H[Process Queue]
 ```
 
-1.  **Intelligent Diffing**: When new notes are pulled, the sync service queries the `note_files` table to get the IDs of any attached files. Instead of blindly downloading them, it compares these IDs against the local database. This saves massive amounts of bandwidth - we only download files we are missing.
+1.  **Intelligent Local Diffing**: When new notes are pulled and decrypted, we extract the file IDs directly from the note content (e.g. image tags). Rather than making a remote network call to query a bridge table like `note_files` during pull, the sync service compares these extracted IDs against the file IDs of the note's previous local version. We only download files that are actually new to this device, skipping any extra API calls for notes with unchanged files.
     
 2.  **Cryptographic Nonce Retrieval**: For the files that _are_ missing locally, the app queries the `encrypted_files` table to retrieve their metadata and, most importantly, the cryptographic `nonce` required to decrypt them.
     
