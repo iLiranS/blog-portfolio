@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { formatDate, getProjectPosts } from "app/blog/utils"
+import { FolderGit2 } from "lucide-react"
 
 interface ProjectPostsProps {
   amount?: number
@@ -49,8 +50,14 @@ export default function ProjectPosts({ amount, featured }: ProjectPostsProps) {
                     className="object-cover w-full h-full group-hover:scale-103 transition-transform duration-500 ease-out"
                   />
                 ) : (
-                  <div className="w-full h-full bg-linear-to-br from-primary/10 via-purple-500/5 to-blue-500/10 flex items-center justify-center min-h-[140px] md:min-h-full">
-                    <span className="text-xs font-bold tracking-tight bg-linear-to-r from-primary via-purple-500 to-blue-500 bg-clip-text text-transparent opacity-70 px-4 text-center">
+                  <div className="w-full h-full bg-linear-to-br from-primary/10 via-purple-500/5 to-blue-500/10 flex flex-col items-center justify-center min-h-[140px] md:min-h-full p-6 transition-all duration-500 group-hover:scale-102 relative overflow-hidden select-none">
+                    <div className="absolute inset-0 bg-radial from-primary/10 via-transparent to-transparent opacity-60 dark:opacity-40 pointer-events-none" />
+                    
+                    <div className="relative mb-2.5 p-3 rounded-2xl bg-white/40 dark:bg-black/20 border border-white/40 dark:border-white/5 shadow-xs backdrop-blur-xs flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:border-primary/20">
+                      <FolderGit2 className="w-5 h-5 text-primary/80 dark:text-primary" />
+                    </div>
+
+                    <span className="relative text-xs font-semibold tracking-wide text-foreground/80 dark:text-foreground/90 px-4 text-center max-w-[200px] line-clamp-2 leading-relaxed">
                       {post.metadata.title}
                     </span>
                   </div>

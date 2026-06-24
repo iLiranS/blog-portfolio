@@ -16,7 +16,7 @@ export default function Page() {
           </span>
         </div>
         <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-xl">
-          I'm a <strong className="font-semibold text-foreground">Full-Stack Developer</strong> 🧑‍💻 &amp; <strong className="font-semibold text-foreground">C.S Student</strong> 🎓 who loves crafting performant, visually stunning, and highly intuitive digital software 🚀
+          I'm a <strong className="font-semibold text-foreground">Full-Stack Developer</strong> 🧑‍💻 &amp; <strong className="font-semibold text-foreground">C.S Student</strong> 🎓 who loves experimenting with random projects and fields 🧪
         </p>
       </div>
 
