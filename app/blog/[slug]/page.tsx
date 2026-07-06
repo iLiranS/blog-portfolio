@@ -156,7 +156,7 @@ export default async function Blog({ params }: BlogPageProps) {
               href={`/blog/${prevPost.slug}`}
               className="group flex flex-col gap-1.5 p-3 rounded-xl border border-border/40 hover:border-primary/30 bg-card-background hover:bg-muted/30 transition-[transform] duration-300 sm:w-1/2"
             >
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground group-hover:text-primary flex items-center gap-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-primary group-hover:text-primary flex items-center gap-1">
                 <ArrowLeft className="h-3 w-3" /> Previous Article
               </span>
               <span className="font-semibold text-sm text-foreground group-hover:underline">
@@ -172,7 +172,7 @@ export default async function Blog({ params }: BlogPageProps) {
               href={`/blog/${nextPost.slug}`}
               className="group flex flex-col gap-1.5 p-3 rounded-xl border border-border/40 hover:border-primary/30 bg-card-background hover:bg-muted/30 transition-[transform] duration-300 sm:w-1/2 items-end text-right"
             >
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground group-hover:text-primary flex items-center gap-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-primary group-hover:text-primary flex items-center gap-1">
                 Next Article <ArrowRight className="h-3 w-3" />
               </span>
               <span className="font-semibold text-sm text-foreground group-hover:underline">
