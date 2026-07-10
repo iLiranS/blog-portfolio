@@ -1,93 +1,116 @@
 ---
 title: '3D Visual Novel Engine'
 publishedAt: '2026-07-06'
-summary: 'A high-performance visual novel engine + game using web technologies.'
+summary: 'A desktop visual novel engine built with React, Tauri, and Three.js, featuring fully animated 3D characters, AI-powered voice generation, and interactive mini-games.'
 ---
 
-> **The Game & Engine is still a Work in Progress...**
+> **This project is still a work in progress.** Most of the current content exists to prototype engine features and gameplay systems before implementing the final story.
 
-A desktop-class visual novel engine built entirely on web technologies. By combining **React**, **Tauri**, and **Three.js** (via React Three Fiber), the engine achieves console-grade 3D character rendering, procedural animations, and interactive mini-games—all running within a lightweight desktop container that bypasses the resource-heavy footprint of traditional Electron apps.
+A desktop visual novel engine built entirely with modern web technologies. Instead of relying on traditional 2D sprites, the engine renders fully interactive **VRM 3D characters** in real time using **Three.js** (React Three Fiber + Drei), while the UI is built with **React**, **Tailwind CSS**, and **Tauri** for a lightweight native desktop experience.
+
+The goal is to blend the presentation of a traditional visual novel with the interactivity of modern games, allowing the story to transition seamlessly into fully playable gameplay sections without changing engines or rendering pipelines.
+
+![](/projects/visual-novel/0.webp)
+
+
+
+# 🛠️ Tech Stack
+
+* **Tauri** — Native desktop wrapper with a significantly smaller memory footprint than Electron.
+* **React + Zustand** — Dialogue system, game state, branching choices, and UI management.
+* **Three.js (React Three Fiber + Drei)** — Real-time 3D rendering, lighting, animations, and post-processing.
+* **Tailwind CSS** — UI styling layered directly alongside the 3D scene.
+* **Pixiv VRM** — Runtime loading and animation of VRM character models.
+* **VRoid Studio** — Creation of custom anime-style characters.
+* **VoiceBox + Qwen3-TTS** — AI-generated voice lines with custom character voices.
+
+---
+
+# 🎭 Fully Animated VRM Characters
+
+Unlike traditional visual novels that use static sprites, every character is a fully rendered **VRM model**.
+
+The engine currently supports:
+
+* **Real-time lip sync** driven directly from voice audio, with fallback behavior for non-voiced dialogue.
+* **Expression blending** with smooth interpolation instead of instant switching.
+* **Character animations** and idle states.
+* A procedural animation system that prevents characters from feeling static through subtle breathing, head movement, eye motion, and posture adjustments.
+
+The goal is to make conversations feel closer to interacting with animated characters than reading static dialogue.
+
+---
+
+# 🗣️ AI Voice Pipeline
+
+Every character can have a unique generated voice.
+
+Voice lines are created using **VoiceBox**, powered by **Qwen3-TTS**, allowing new dialogue to be generated without recording voice actors during development.
+
+Those generated voice lines are automatically synchronized with the lip-sync system so mouth movement closely matches the spoken audio.
+
+---
+
+# 🎮 Interactive Mini-Games
+
+The engine supports both **fullscreen** and **windowed** mini-games.
+
+Windowed mode allows gameplay to coexist with the visual novel interface, letting characters remain visible on top of the game and react in real time, making gameplay feel like part of the conversation rather than a separate mode.
+
+Current examples include:
+
+## Procedural Dungeon
+
+A 3D exploration mini-game built on top of an excellent procedural dungeon generation project I found on GitHub and extended with my own gameplay systems.
+
+My additions include:
+
+* Player controller
+* Character rendering
+* Collectibles
+* Exploration mechanics
+
+The plan is to expand it further with enemies, objectives, combat, and additional progression systems.
+
+## Drawing Recognition
+
+Originally inspired by *Witch Hat Atelier*, this mini-game focuses on recognizing player-drawn symbols.
+
+Instead of matching predefined shapes, the long-term goal is to allow intuitive drawings that carry meaning naturally.
+
+The implementation is based on the **$N Recognition Algorithm**, extended with custom preprocessing such as grouping nearby strokes into unified shapes before recognition.
+
+There are also several smaller mini-games used throughout the story, primarily to test engine capabilities and narrative pacing.
+
 ![](/projects/visual-novel/1.webp)
 
 
 ---
 
-## 🛠️ The Tech Stack: Pushing Web Tech to the Limit
+# 🤖 AI-Assisted Development
 
-Developing a modern 3D experience in the browser requires a carefully tuned balance between aesthetic fidelity and runtime performance.
+Much of the engine was developed alongside AI tools.
 
-*   **Tauri (Rust Core)**: Used as the desktop application wrapper, keeping the memory footprint as low as possible and providing native OS bridges.
-*   **React + Zustand**: Drives the visual novel's state machine, dialogue system, branching story choices, and state-driven beats.
-*   **React Three Fiber & Pixiv VRM**: Handles real-time rendering of complex anime-style characters with bone-based rigging, shaders, and light sources.
-*   **ComfyUI & VRoid Studio**: Serves as the content creation pipeline, generating 2D visual reference boards and translating them into fully rigged 3D avatar characters.
-*   **VoiceBox AI**: Powers the audio generation pipeline, producing custom voiceovers mapped directly to real-time lip-sync.
+They significantly accelerated development, especially when building repetitive systems and prototypes. However, performance optimization, rendering architecture, and engine-level decisions still required substantial manual iteration, debugging, and refinement.
 
 ---
 
-## 🎭 Intelligent VRM Avatar System
+# ⚡ Performance
 
-Instead of using static 2D sprites or pre-rendered videos, characters are loaded as fully interactive **VRM 3D models** in real time. 
+Rendering multiple animated 3D characters while maintaining responsive UI required several engine optimizations:
 
-### 1. Procedural Lifelike Animations
-To prevent characters from looking stiff, the engine runs continuous procedural animation loops on the model's skeletal joints:
-*   **Micro-Saccades & Wander**: Simulated eye movements that realistically jitter and wander slightly to emulate human focus.
-*   **Natural Breathing Cycles**: Sine-wave animations that affect the spine, chest, and head at randomized frequencies.
-*   **Idle Posture Shifting**: Weight shifts between the left and right legs over time, preventing the "statue" effect.
-*   **Dynamic Head Tracking**: Characters orient their heads and eyes naturally toward the screen or the current speaker.
-
-### 2. Real-Time Amplitude Lip-Sync
-The engine integrates audio-level analysis to drive the mouth blendshapes (`A`, `I`, `U`, `E`, `O`) in real-time. If voice files are playing or dialogue is typing, the avatar's jaw and mouth scale and flex programmatically in sync with the sound waves.
-
-### 3. Smart Expression Blending
-Transitions between expressions (e.g., *happy*, *confused*, *serious*) use weight-interpolation curves, allowing expressions to blend smoothly rather than snapping instantly.
+* Runtime asset and cache cleanup between scenes to avoid memory growth.
+* Adaptive rendering resolution and configurable performance profiles.
+* Careful resource management for VRM models and textures.
+* Rendering techniques that allow characters to integrate cleanly with HTML-based interfaces without visual clipping.
 
 ---
 
-## 🎨 Asset Creation & AI Pipeline
+# 🔮 Next Steps
 
-Creating custom assets for a 3D visual novel is accelerated through a modern, hybrid pipeline of generative AI and 3D modeling tools:
-
-```mermaid
-graph LR
-    A[ComfyUI Workflow] -->|Character Concept & Profile Art| B[VRoid Studio]
-    B -->|Custom 3D VRM Models| C[React Three Fiber Canvas]
-    D[VoiceBox AI] -->|Custom Audio Voice Lines| E[Dynamic Lip Sync Engine]
-```
-
-*   **Concept Art & Style Reference (ComfyUI)**: A custom Stable Diffusion workflow in ComfyUI generates unified character profile pictures and art styles. These serve as the blueprint and stylistic reference board for 3D modeling.
-*   **3D Character Modeling (VRoid Studio)**: High-quality, custom anime-style characters are modeled in VRoid Studio based on the ComfyUI designs, then optimized and exported directly as `.vrm` files.
-*   **Custom Voice Generation (VoiceBox)**: Voice lines are generated using VoiceBox, enabling custom, unique voice profiles for each character. These audio assets feed directly into the engine's dynamic lip-sync script.
-
----
-
-## ⚙️ Performance Optimizations
-
-Running multiple rich 3D models alongside interactive scenes demands strict resource management:
-
-*   **Loader Cache Purging**: The engine clears `THREE.Cache` on scene transitions, forcing garbage collection of heavy GLTF textures and buffers to prevent memory leaks during long play sessions.
-*   **Adaptive Canvas Resolution**: Pixel ratio limits and antialiasing options scale dynamically based on the user's selected performance profile (DPR ranges from `1.0` to `1.5`).
-*   **Dialogue Box Clipping Masks**: To ensure UI controls are cleanly visible, a custom clipping mask cuts off 3D character rendering exactly where the dialog box overlays, preventing avatars from clipping through UI elements.
-
----
-
-## 🎮 Interactive 3D Gameplay & Minigames
-
-Rather than being a passive reading experience, the story beats seamlessly hand off control to interactive 3D gameplay and minigames running on the same Canvas:
-
-```mermaid
-graph TD
-    A[Branching Story Line] -->|Trigger Beat| B[Active Minigame Controller]
-    B -->|Initialize 3D Canvas| C[Interactive Gameplay Scene]
-    C -->|Mouse & Touch Pointer Events| D[Dynamic Physics & Feedback Loop]
-    D -->|Complete Objective| E[Resume Narrative Progression]
-```
-
-When a gameplay beat is triggered, the visual novel UI transitions smoothly, and the active minigame takes over the viewport. Players interact directly with 3D elements on the Canvas using physics, pointer events, and custom materials to solve puzzles or complete action sequences before resuming the story narrative.
-
----
-
-## 🔮 Next Steps
-
-*   **Implementing the Actual Plot**: Scripting and choreographing the core storyline narrative, choice paths, and character dialog beats.
-*   **Advanced Post-Processing & Assets**: Integrating high-fidelity visual effects using post-processing stacks (like Bloom and Ambient Occlusion) and custom 3D environmental assets.
-*   **Cool Interactive Systems**: Building richer player mechanics, immersive inspection interactions, and dynamic environments.
+* Write and implement the full story (current dialogue is placeholder content).
+* Expand the procedural animation system.
+* Add more advanced mini-games and gameplay mechanics.
+* Introduce enemies and additional objectives to the dungeon system.
+* Improve environmental assets and post-processing.
+* Continue polishing the engine into a complete framework for story-driven games.
