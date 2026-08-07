@@ -1,116 +1,51 @@
 ---
 title: '3D Visual Novel Engine'
-publishedAt: '2026-07-06'
-summary: 'A desktop visual novel engine built with React, Tauri, and Three.js, featuring fully animated 3D characters, AI-powered voice generation, and interactive mini-games.'
+publishedAt: '2026-08-07'
+summary: 'A story-driven 3D game framework that combines expressive VRM characters, cinematic rendering, branching scenes, and playable combat inside one React and Three.js runtime.'
 ---
 
-> **This project is still a work in progress.** Most of the current content exists to prototype engine features and gameplay systems before implementing the final story.
+A story-driven game framework built to make the boundary between visual novel and game disappear. Dialogue scenes use fully animated **VRM characters**, while the same runtime can transition into cinematic moments, spell-drawing challenges, maze exploration, and a real-time 3D dungeon encounter without changing engines.
 
-A desktop visual novel engine built entirely with modern web technologies. Instead of relying on traditional 2D sprites, the engine renders fully interactive **VRM 3D characters** in real time using **Three.js** (React Three Fiber + Drei), while the UI is built with **React**, **Tailwind CSS**, and **Tauri** for a lightweight native desktop experience.
+The project is built with **React**, **Three.js**, and **Tauri**, with Zustand coordinating story state, choices, affection flags, audio, and minigame progression. Story content is organized as discoverable route and scene modules, so new chapters can be added without hard-coding them into the player.
 
-The goal is to blend the presentation of a traditional visual novel with the interactivity of modern games, allowing the story to transition seamlessly into fully playable gameplay sections without changing engines or rendering pipelines.
+![Dialogue scene with animated VRM characters](/projects/visual-novel/dialogue-preview.webp)
 
-![](/projects/visual-novel/0.webp)
+## Expressive 3D storytelling
 
+Characters are rendered as live VRM models rather than static sprites. They support:
 
+* Runtime expressions, active speakers, facial effects, and animation states.
+* Procedural idle motion—breathing, head movement, eye motion, and posture shifts.
+* Voice-driven lip sync with generated character voices and fallback behavior for unvoiced dialogue.
+* Runtime attachments for props and accessories, including bone-relative transforms.
 
-# 🛠️ Tech Stack
+The presentation layer also supports branching choices, scene jumps, background effects, sound effects, BGM, affection flags, look-ahead asset preloading, and characters that remain visible while a minigame runs in a windowed dialogue layout.
 
-* **Tauri** — Native desktop wrapper with a significantly smaller memory footprint than Electron.
-* **React + Zustand** — Dialogue system, game state, branching choices, and UI management.
-* **Three.js (React Three Fiber + Drei)** — Real-time 3D rendering, lighting, animations, and post-processing.
-* **Tailwind CSS** — UI styling layered directly alongside the 3D scene.
-* **Pixiv VRM** — Runtime loading and animation of VRM character models.
-* **VRoid Studio** — Creation of custom anime-style characters.
-* **VoiceBox + Qwen3-TTS** — AI-generated voice lines with custom character voices.
+## Cinematic scene system
 
----
+Story beats can become authored cinematic compositions with layered backgrounds and foregrounds, parallax, camera motion, shader styles, particles, screen effects, and optional post-processing. A live cinematic editor exposes scene settings and effect controls while the game is running, making visual iteration much faster than editing static screenshots by hand.
 
-# 🎭 Fully Animated VRM Characters
+![Layered cinematic scene preview](/projects/visual-novel/cinematic-preview.webp)
 
-Unlike traditional visual novels that use static sprites, every character is a fully rendered **VRM model**.
+The renderer has both **WebGPU and WebGL paths**, quality profiles, adaptive pixel ratios, and surface-scoped post-processing for effects such as saturation, vignette, bloom, and SMAA. Asset cleanup, caching, and dungeon preloading keep transitions responsive as the scene changes from conversation to exploration.
 
-The engine currently supports:
+## Playable systems inside the story
 
-* **Real-time lip sync** driven directly from voice audio, with fallback behavior for non-voiced dialogue.
-* **Expression blending** with smooth interpolation instead of instant switching.
-* **Character animations** and idle states.
-* A procedural animation system that prevents characters from feeling static through subtle breathing, head movement, eye motion, and posture adjustments.
+The engine currently registers several playable formats: crystal decryption, alphabet collection, maze exploration, spell casting with drawing recognition, and a procedural dungeon.
 
-The goal is to make conversations feel closer to interacting with animated characters than reading static dialogue.
+The dungeon has grown into a small combat framework rather than a placeholder prototype. It combines seeded procedural layouts, first-person exploration, objectives, collectibles, minimaps, enemy presets, party members, and a unified attack pipeline. Skills can target grid patterns, apply damage-over-time and status effects, spawn enemies, chain into multi-phase sequences, and resolve through distinct projectile, fireball, lightning, tsunami, sword-swing, and explosion effects.
 
----
+<video controls loop muted playsInline preload="metadata" poster="/projects/visual-novel/dungeon-preview.webp" className="w-full rounded-xl" src="/projects/visual-novel/dungeon-preview.mp4">
+  Your browser does not support embedded video. [View the dungeon preview](/projects/visual-novel/dungeon-preview.mp4).
+</video>
 
-# 🗣️ AI Voice Pipeline
+## Stack
 
-Every character can have a unique generated voice.
+* **React + Zustand** — story flow, branching state, choices, flags, and UI.
+* **Three.js / React Three Fiber / Drei** — VRM characters, environments, cameras, effects, and minigames.
+* **WebGPU with WebGL fallback** — modern rendering with a compatibility path.
+* **Tauri** — lightweight native desktop packaging.
+* **Pixiv VRM + VRoid Studio** — runtime characters and custom anime-style models.
+* **VoiceBox + Qwen3-TTS** — generated character voices connected to lip sync.
 
-Voice lines are created using **VoiceBox**, powered by **Qwen3-TTS**, allowing new dialogue to be generated without recording voice actors during development.
-
-Those generated voice lines are automatically synchronized with the lip-sync system so mouth movement closely matches the spoken audio.
-
----
-
-# 🎮 Interactive Mini-Games
-
-The engine supports both **fullscreen** and **windowed** mini-games.
-
-Windowed mode allows gameplay to coexist with the visual novel interface, letting characters remain visible on top of the game and react in real time, making gameplay feel like part of the conversation rather than a separate mode.
-
-Current examples include:
-
-## Procedural Dungeon
-
-A 3D exploration mini-game built on top of an excellent procedural dungeon generation project I found on GitHub and extended with my own gameplay systems.
-
-My additions include:
-
-* Player controller
-* Character rendering
-* Collectibles
-* Exploration mechanics
-
-The plan is to expand it further with enemies, objectives, combat, and additional progression systems.
-
-## Drawing Recognition
-
-Originally inspired by *Witch Hat Atelier*, this mini-game focuses on recognizing player-drawn symbols.
-
-Instead of matching predefined shapes, the long-term goal is to allow intuitive drawings that carry meaning naturally.
-
-The implementation is based on the **$N Recognition Algorithm**, extended with custom preprocessing such as grouping nearby strokes into unified shapes before recognition.
-
-There are also several smaller mini-games used throughout the story, primarily to test engine capabilities and narrative pacing.
-
-![](/projects/visual-novel/1.webp)
-
-
----
-
-# 🤖 AI-Assisted Development
-
-Much of the engine was developed alongside AI tools.
-
-They significantly accelerated development, especially when building repetitive systems and prototypes. However, performance optimization, rendering architecture, and engine-level decisions still required substantial manual iteration, debugging, and refinement.
-
----
-
-# ⚡ Performance
-
-Rendering multiple animated 3D characters while maintaining responsive UI required several engine optimizations:
-
-* Runtime asset and cache cleanup between scenes to avoid memory growth.
-* Adaptive rendering resolution and configurable performance profiles.
-* Careful resource management for VRM models and textures.
-* Rendering techniques that allow characters to integrate cleanly with HTML-based interfaces without visual clipping.
-
----
-
-# 🔮 Next Steps
-
-* Write and implement the full story (current dialogue is placeholder content).
-* Expand the procedural animation system.
-* Add more advanced mini-games and gameplay mechanics.
-* Introduce enemies and additional objectives to the dungeon system.
-* Improve environmental assets and post-processing.
-* Continue polishing the engine into a complete framework for story-driven games.
+The project is still evolving toward its full story. The engine foundation is now in place: authored narrative content, cinematic presentation, and interactive gameplay all share the same state, rendering, and asset pipeline.

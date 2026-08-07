@@ -24,7 +24,7 @@ const markdownSanitizeSchema = {
   ...defaultSchema,
   tagNames: [
     ...(defaultSchema.tagNames ?? []),
-    "details", "summary", "span", "mark", "u", "div",
+    "details", "summary", "span", "mark", "u", "div", "video",
   ],
   attributes: {
     ...defaultSchema.attributes,
@@ -32,6 +32,7 @@ const markdownSanitizeSchema = {
     details: ["open"],
     span: [...(defaultSchema.attributes?.span ?? []), "style", "className"],
     div: ["style", "className"],
+    video: ["autoPlay", "className", "controls", "loop", "muted", "playsInline", "poster", "preload", "src"],
     mark: [...(defaultSchema.attributes?.mark ?? []), "style"],
   },
 }
@@ -194,4 +195,3 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
     </div>
   )
 }
-
