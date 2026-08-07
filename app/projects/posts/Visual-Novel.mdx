@@ -4,6 +4,8 @@ publishedAt: '2026-08-07'
 summary: 'A story-driven 3D game framework that combines expressive VRM characters, cinematic rendering, branching scenes, and playable combat inside one React and Three.js runtime.'
 ---
 
+> Want to go deeper into the architecture behind this project? [Read the technical post: From dialogue to dungeon](/blog/visual-novel-unified-runtime).
+
 A story-driven game framework built to make the boundary between visual novel and game disappear. Dialogue scenes use fully animated **VRM characters**, while the same runtime can transition into cinematic moments, spell-drawing challenges, maze exploration, and a real-time 3D dungeon encounter without changing engines.
 
 The project is built with **React**, **Three.js**, and **Tauri**, with Zustand coordinating story state, choices, affection flags, audio, and minigame progression. Story content is organized as discoverable route and scene modules, so new chapters can be added without hard-coding them into the player.
@@ -35,7 +37,7 @@ The engine currently registers several playable formats: crystal decryption, alp
 
 The dungeon has grown into a small combat framework rather than a placeholder prototype. It combines seeded procedural layouts, first-person exploration, objectives, collectibles, minimaps, enemy presets, party members, and a unified attack pipeline. Skills can target grid patterns, apply damage-over-time and status effects, spawn enemies, chain into multi-phase sequences, and resolve through distinct projectile, fireball, lightning, tsunami, sword-swing, and explosion effects.
 
-<video controls loop muted playsInline preload="metadata" poster="/projects/visual-novel/dungeon-preview.webp" className="w-full rounded-xl" src="/projects/visual-novel/dungeon-preview.mp4">
+<video controls loop muted playsInline preload="metadata" poster="/projects/visual-novel/dialogue-preview.webp" className="w-full rounded-xl" src="/projects/visual-novel/dungeon-preview.mp4">
   Your browser does not support embedded video. [View the dungeon preview](/projects/visual-novel/dungeon-preview.mp4).
 </video>
 

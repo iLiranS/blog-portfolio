@@ -1,0 +1,71 @@
+---
+title: 'From Dialogue to Dungeon: Building a Unified Visual Novel Runtime'
+publishedAt: '2026-08-07'
+summary: 'How I designed one React and Three.js runtime to move between branching dialogue, cinematic scenes, and playable 3D systems.'
+---
+
+![Animated dialogue scene from the visual novel engine](/projects/visual-novel/dialogue-preview.webp)
+
+When I started building this visual novel, I did not want gameplay to feel like a separate application that happened to open between two dialogue screens. The goal was for a story beat to be able to become a conversation, a cinematic moment, or a playable scene while keeping the same characters, state, audio, and rendering pipeline.
+
+That decision shaped most of the architecture.
+
+## The story is a sequence of data-driven beats
+
+Story content is represented as routes, scenes, and beats. A route can contain multiple scene files, and the route registry discovers those files automatically with Vite's `import.meta.glob`. The player resolves the current scene and beat from the Zustand game store, rather than importing a particular chapter directly into the player.
+
+Each beat can describe dialogue, a speaker, characters on screen, a background, audio, choices, flags, or a jump to another beat. Choices can point to another beat in the current scene or to a different scene entirely. A choice can also set a flag, which is how the story can accumulate state such as affection values.
+
+This keeps the narrative readable as content. The player does not need to know why a character is on the left side of the screen or what a choice means; it only needs to resolve the presentation described by the current beat.
+
+## One beat, several kinds of presentation
+
+The important distinction is between story state and presentation. A dialogue beat can resolve its background, characters, active speaker, expression, animation, and effects. A cinematic beat can add layered images, parallax, camera movement, particles, shader styles, and post-processing. A minigame beat can mount a playable component while still using the same story progression callbacks.
+
+The `ActiveMinigame` component looks up a minigame by ID in a registry. The registry supplies the component as well as presentation details such as its instructions, score behavior, camera type, lighting, and whether physics is enabled. That gives the game several playable formats without turning the main visual novel player into a collection of hard-coded special cases.
+
+The current registry includes:
+
+* Crystal Decryption
+* Alphabet Collector
+* Maze
+* Spell Casting and Spell Ritual
+* Procedural Dungeon
+
+Minigames can run in windowed or fullscreen mode. In windowed mode, the visual novel layout remains part of the experience and characters can stay visible while the game is active. Completing the minigame calls back into the story flow, which advances to the next beat instead of navigating to an unrelated page.
+
+## Keeping characters present across systems
+
+The characters are not images swapped into a dialogue box. They are VRM models rendered through Three.js and React Three Fiber. The same character state can control an expression, animation, facial effect, active speaker status, and optional bone-attached props.
+
+To keep them from feeling like statues, the project includes procedural standing motion for subtle breathing, head movement, eye movement, and posture changes. Voice playback is connected to lip sync through an amplitude reference, so a voiced line can drive the active character's mouth movement. Generated voice assets use the same audio path as the rest of the game instead of requiring a separate dialogue viewer.
+
+That shared character layer matters when entering a minigame. The player can keep the relevant VRM models mounted, preload upcoming characters, and pass minigame-specific expression or animation state through the same store. The transition feels like a change in what the characters are doing, not a change in which application is running.
+
+## The dungeon is a good stress test
+
+The procedural dungeon exposes whether this architecture actually works. It has seeded dungeon generation, rooms and props, player movement, collectibles, objectives, a minimap, enemy presets, and an encounter flow that moves between exploration and battle.
+
+Combat uses a unified attack model. Skills define their targeting pattern, affected grid cells, anticipation time, visual detonation type, payload, and optional sound or animation. Payloads can contain direct damage, damage-over-time effects, debuffs, or enemy spawning. A skill can also define multiple waves or chained follow-up segments, which allows one action to resolve as a sequence of different attacks and effects.
+
+The visual layer is deliberately separate from the resolution rules. The combat system decides what cells are affected and what payload is applied; effect components handle how that result is shown, whether it is a projectile, fireball, lightning strike, tsunami, explosion, sword swing, or another registered visual. This makes it possible to add a new presentation without rewriting the whole encounter loop.
+
+<video controls loop muted playsInline preload="metadata" poster="/projects/visual-novel/dungeon-preview.webp" className="w-full rounded-xl" src="/projects/visual-novel/dungeon-preview.mp4">
+  Your browser does not support embedded video. [View the dungeon preview](/projects/visual-novel/dungeon-preview.mp4).
+</video>
+
+## Rendering is shared, but not rigid
+
+The game has both WebGPU and WebGL renderer paths. Story surfaces use their own viewport and camera, which lets the 3D scene coexist with HTML dialogue UI without allowing one surface to clear or clip another. Cinematic post-processing is opt-in and can apply saturation, vignette, bloom, or SMAA according to the active quality profile.
+
+The same concern appears in asset loading. The player scans upcoming beats to preload background images and characters, while dungeon data can be generated before the minigame mounts. At route or scene boundaries, VRM and Three.js caches are cleared deliberately to prevent old content from accumulating indefinitely.
+
+These are not features that are visible in a screenshot, but they determine whether a scene transition feels like part of a game or like a loading demo.
+
+## What the architecture makes possible
+
+The main result is not simply a visual novel with minigames attached. It is a shared content and runtime model where narrative state can drive presentation and gameplay without losing continuity.
+
+There is still a full story to write and plenty of systems to polish, but the foundation is now flexible enough to support that work. New scenes can be added as route content, new minigames can be registered with their own configuration, and cinematic presentation can evolve without forcing the dialogue system or dungeon logic to know about every visual detail.
+
+That is the part of the project I find most interesting: the visual novel is becoming less of a fixed format and more of a runtime for story-driven experiences.
