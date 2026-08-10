@@ -12,17 +12,53 @@ import { ThemeProvider } from 'next-themes'
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: 'Home - LiranS',
-    template: "%s - LiranS"
+    default: 'Liran S. | Full-Stack Developer & Portfolio',
+    template: '%s | LiranS',
   },
-  description: 'This is my portfolio.',
+  description:
+    'Full-stack software developer portfolio featuring projects in web development, local-first applications, encryption, software architecture, and technical writing.',
+  keywords: [
+    'Liran',
+    'LiranS',
+    'Full-Stack Developer',
+    'Software Engineer',
+    'Portfolio',
+    'Web Development',
+    'React',
+    'Next.js',
+    'TypeScript',
+    'Encryption',
+    'Local-First Apps',
+  ],
+  authors: [{ name: 'Liran', url: baseUrl }],
+  creator: 'Liran',
+  publisher: 'LiranS',
+  alternates: {
+    canonical: './',
+  },
   openGraph: {
-    title: 'My Portfolio',
-    description: 'This is my portfolio.',
+    title: 'Liran S. | Full-Stack Developer & Portfolio',
+    description:
+      'Full-stack software developer portfolio featuring projects in web development, local-first applications, encryption, software architecture, and technical writing.',
     url: baseUrl,
-    siteName: 'My Portfolio',
+    siteName: 'LiranS Portfolio',
     locale: 'en_US',
     type: 'website',
+    images: [
+      {
+        url: `${baseUrl}/og?title=${encodeURIComponent('LiranS - Full-Stack Developer & Portfolio')}`,
+        width: 1200,
+        height: 630,
+        alt: 'LiranS Portfolio',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Liran S. | Full-Stack Developer & Portfolio',
+    description:
+      'Full-stack software developer portfolio featuring projects in web development, local-first applications, encryption, software architecture, and technical writing.',
+    images: [`${baseUrl}/og?title=${encodeURIComponent('LiranS - Full-Stack Developer & Portfolio')}`],
   },
   robots: {
     index: true,
@@ -55,6 +91,37 @@ export default function RootLayout({
       )}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@graph': [
+                {
+                  '@type': 'WebSite',
+                  '@id': `${baseUrl}/#website`,
+                  url: baseUrl,
+                  name: 'LiranS',
+                  description:
+                    'Full-stack software developer portfolio featuring projects in web development, local-first applications, encryption, and technical writing.',
+                  author: {
+                    '@id': `${baseUrl}/#person`,
+                  },
+                },
+                {
+                  '@type': 'Person',
+                  '@id': `${baseUrl}/#person`,
+                  name: 'Liran',
+                  url: baseUrl,
+                  jobTitle: 'Full-Stack Developer',
+                  sameAs: ['https://github.com/iLiranS'],
+                },
+              ],
+            }),
+          }}
+        />
+      </head>
       <body className="subpixel-antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <main className="max-w-3xl mx-auto mb-16 mt-10 px-4 sm:px-6 flex-auto min-w-0 flex flex-col">
