@@ -16,6 +16,7 @@ const cn = (...classes: (string | boolean | undefined)[]) => classes.filter(Bool
 
 export function TableOfContents({ headings }: TableOfContentsProps) {
   const [activeId, setActiveId] = useState<string>(headings[0]?.id || "")
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const isClickScrolling = useRef(false)
 
   useEffect(() => {
@@ -112,45 +113,83 @@ export function TableOfContents({ headings }: TableOfContentsProps) {
   if (headings.length === 0) return null
 
   return (
-    <nav className="flex flex-col gap-2.5 py-4 items-end pr-2" aria-label="Table of contents">
-      {headings.map((heading) => {
+    <nav
+      className="flex flex-col gap-0.5 pb-2 items-end pr-2"
+      aria-label="Table of contents"
+      onMouseLeave={() => setHoveredIndex(null)}
+    >
+      {headings.map((heading, index) => {
         const isActive = activeId === heading.id
 
-        let barWidth = "w-8"
-        let activeWidth = "w-12"
-        if (heading.level === 3) {
-          barWidth = "w-5"
-          activeWidth = "w-8"
-        } else if (heading.level === 4) {
-          barWidth = "w-3"
-          activeWidth = "w-5"
+        // Base width in px before scaleX transformation
+        let basePx = 32 // w-8 = 2rem = 32px
+        let barWidthClass = "w-8"
+        if (isActive) {
+          if (heading.level === 3) {
+            basePx = 32 // w-8
+            barWidthClass = "w-8"
+          } else if (heading.level === 4) {
+            basePx = 20 // w-5
+            barWidthClass = "w-5"
+          } else {
+            basePx = 48 // w-12 = 3rem = 48px
+            barWidthClass = "w-12"
+          }
+        } else {
+          if (heading.level === 3) {
+            basePx = 20 // w-5
+            barWidthClass = "w-5"
+          } else if (heading.level === 4) {
+            basePx = 12 // w-3
+            barWidthClass = "w-3"
+          }
         }
+
+        // Dock effect calculation (hovered item and up to 2 items away)
+        let scale = 1
+        if (hoveredIndex !== null) {
+          const distance = Math.abs(hoveredIndex - index)
+          if (distance === 0) {
+            scale = 1.75
+          } else if (distance === 1) {
+            scale = 1.4
+          } else if (distance === 2) {
+            scale = 1.15
+          }
+        }
+
+        const effectiveLineWidth = basePx * scale
 
         return (
           <a
             key={heading.id}
             href={`#${heading.id}`}
             onClick={(e) => handleScrollTo(e, heading.id)}
+            onMouseEnter={() => setHoveredIndex(index)}
             className="group relative flex h-3.5 items-center focus:outline-none"
           >
             {/* Visual line representation */}
             <div
               className={cn(
-                "h-[3px] rounded-full transition-all duration-300",
+                "h-[3px] rounded-full origin-right transition-transform duration-200 ease-out",
                 isActive
-                  ? `bg-primary ${activeWidth}`
-                  : `bg-muted-foreground/30 group-hover:bg-muted-foreground/75 ${barWidth}`
+                  ? `bg-primary ${barWidthClass}`
+                  : `bg-muted-foreground/30 group-hover:bg-muted-foreground/75 ${barWidthClass}`
               )}
+              style={{
+                transform: `scaleX(${scale})`,
+              }}
             />
 
-            {/* Title on the right of the bar */}
+            {/* Title on the left (positioned from the right anchor) */}
             <span
               className={cn(
-                "absolute right-full mr-3 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase tracking-wider transition-all duration-300 ease-out pointer-events-none select-none block truncate text-right",
-                isActive
-                  ? "text-primary opacity-100 translate-x-0 max-w-[150px]"
-                  : "text-muted-foreground/70 opacity-0 translate-x-2 max-w-0 group-hover:opacity-100 group-hover:translate-x-0 group-hover:max-w-[150px]"
+                "absolute right-0 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase tracking-wider transition-all duration-200 ease-out pointer-events-none select-none block truncate text-right opacity-0 translate-x-2 max-w-0 group-hover:opacity-100 group-hover:translate-x-0 group-hover:max-w-[150px]",
+                isActive ? "text-primary" : "text-muted-foreground/70"
               )}
+              style={{
+                marginRight: `${effectiveLineWidth + 10}px`,
+              }}
               title={heading.text}
             >
               {heading.text}
@@ -161,3 +200,4 @@ export function TableOfContents({ headings }: TableOfContentsProps) {
     </nav>
   )
 }
+
