@@ -5,7 +5,7 @@ import { TableOfContents } from "app/components/table-of-contents"
 import { formatDate, getBlogPosts, extractHeadings, getReadTime } from "app/blog/utils"
 import { baseUrl } from "app/sitemap"
 import Link from "next/link"
-import { Calendar, Clock, ArrowLeft, ArrowRight } from "lucide-react"
+import { Calendar, Clock, ArrowLeft, ArrowRight, RotateCw } from "lucide-react"
 
 interface BlogPageProps {
   params: Promise<{
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: BlogPageProps) {
   const post = getBlogPosts().find((p) => p.slug === slug)
   if (!post) return {}
 
-  const { title, publishedAt: publishedTime, summary: description, image } = post.metadata
+  const { title, publishedAt: publishedTime, updatedAt, summary: description, image } = post.metadata
   const ogImage = image ? image : `${baseUrl}/og?title=${encodeURIComponent(title)}`
 
   return {
@@ -40,6 +40,7 @@ export async function generateMetadata({ params }: BlogPageProps) {
       description,
       type: "article",
       publishedTime,
+      ...(updatedAt ? { modifiedTime: updatedAt } : {}),
       url: `${baseUrl}/blog/${post.slug}`,
       images: [{ url: ogImage }],
     },
@@ -76,7 +77,7 @@ export default async function Blog({ params }: BlogPageProps) {
   return (
     <>
       <ScrollProgress />
-      <div className="relative w-full">
+      <div className="relative">
         {/* Schema Markup */}
         <script
           type="application/ld+json"
@@ -87,7 +88,7 @@ export default async function Blog({ params }: BlogPageProps) {
               "@type": "BlogPosting",
               headline: post.metadata.title,
               datePublished: post.metadata.publishedAt,
-              dateModified: post.metadata.publishedAt,
+              dateModified: post.metadata.updatedAt || post.metadata.publishedAt,
               description: post.metadata.summary,
               image: post.metadata.image
                 ? `${baseUrl}${post.metadata.image}`
@@ -115,15 +116,23 @@ export default async function Blog({ params }: BlogPageProps) {
             <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl leading-tight">
               {post.metadata.title}
             </h1>
-            <div className="flex flex-wrap gap-3 text-xs text-muted-foreground font-mono">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-muted-foreground font-mono">
               <span className="flex items-center gap-1.5 rounded-full bg-muted/50 border border-border/30 px-3 py-1">
-                <Calendar className="h-3.5 w-3.5 text-primary" />
+                <Calendar className="h-3.5 w-3.5 text-primary shrink-0" />
                 <time dateTime={post.metadata.publishedAt}>
                   {formatDate(post.metadata.publishedAt)}
                 </time>
               </span>
+              {post.metadata.updatedAt && (
+                <span className="flex items-center gap-1.5 rounded-full bg-muted/50 border border-border/30 px-3 py-1">
+                  <RotateCw className="h-3 w-3 text-primary shrink-0" />
+                  <time dateTime={post.metadata.updatedAt}>
+                    Updated {formatDate(post.metadata.updatedAt)}
+                  </time>
+                </span>
+              )}
               <span className="flex items-center gap-1.5 rounded-full bg-muted/50 border border-border/30 px-3 py-1">
-                <Clock className="h-3.5 w-3.5 text-primary" />
+                <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
                 <span>{readTime} min read</span>
               </span>
             </div>

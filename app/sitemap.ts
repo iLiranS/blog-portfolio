@@ -31,7 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Blog posts
   const blogPosts: MetadataRoute.Sitemap = getBlogPosts().map((post) => ({
     url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: post.metadata.publishedAt,
+    lastModified: post.metadata.updatedAt || post.metadata.publishedAt,
     changeFrequency: 'monthly',
     priority: 0.7,
   }))
@@ -39,7 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Project posts
   const projectPosts: MetadataRoute.Sitemap = getProjectPosts().map((post) => ({
     url: `${baseUrl}/projects/${post.slug}`,
-    lastModified: post.metadata.publishedAt,
+    lastModified: post.metadata.updatedAt || post.metadata.publishedAt,
     changeFrequency: 'monthly',
     priority: 0.7,
   }))

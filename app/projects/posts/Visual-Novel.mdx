@@ -1,53 +1,132 @@
 ---
-title: '3D Visual Novel Engine'
+title: 'Cinematic 3D Game Runtime'
 publishedAt: '2026-08-07'
-summary: 'A story-driven 3D game framework that combines expressive VRM characters, cinematic rendering, branching scenes, and playable combat inside one React and Three.js runtime.'
+updatedAt : '2026-08-19'
+summary: 'A story-driven 3D game runtime where expressive VRM characters, cinematic scenes, procedural exploration, and real-time combat all live inside the same narrative experience.'
+image: '/projects/visual-novel/dialogue-preview.webp'
 ---
+
+This is a fantasy game project built around a simple idea: **the story and the gameplay should feel like parts of the same world**.
+
+Instead of treating gameplay as a separate screen that opens between dialogue scenes, the project gives every story beat access to the same characters, state, audio, rendering, and asset pipeline. A conversation can become a cinematic composition, a spell-drawing challenge, or a real-time dungeon encounter without changing engines or breaking the player’s sense of continuity.
 
 <video controls loop muted playsInline preload="metadata" poster="/projects/visual-novel/dungeon-preview.webp" className="w-full rounded-xl" src="/projects/visual-novel/dungeon-preview.mp4">
   Your browser does not support embedded video. [View the dungeon preview](/projects/visual-novel/dungeon-preview.mp4).
 </video>
 
-> Want to go deeper into the architecture behind this project? [Read the technical post: From dialogue to dungeon](/blog/visual-novel-unified-runtime).
+## One runtime, several ways to tell a story
 
-A story-driven game framework built to make the boundary between visual novel and game disappear. Dialogue scenes use fully animated **VRM characters**, while the same runtime can transition into cinematic moments, spell-drawing challenges, maze exploration, and a real-time 3D dungeon encounter without changing engines.
+The project is not just a visual novel with minigames attached. It is a shared runtime for story-driven experiences, with each layer contributing to the same player journey.
 
-The project is built with **React**, **Three.js**, and **Tauri**, with Zustand coordinating story state, choices, affection flags, audio, and minigame progression. Story content is organized as discoverable route and scene modules, so new chapters can be added without hard-coding them into the player.
+| Layer | Responsibility |
+| --- | --- |
+| Narrative | Routes, scenes, dialogue beats, choices, jumps, and story flags |
+| Characters | Live VRM models with expressions, animation, lip sync, and props |
+| Cinematics | Authored cameras, lighting, procedural skies, particles, and post-processing |
+| Gameplay | Spell casting, procedural dungeon exploration, combat, objectives, and upgrades |
+| Runtime | Persistent state, audio, asset preloading, renderer selection, and desktop delivery |
 
-![Dialogue scene with animated VRM characters](/projects/visual-novel/dialogue-preview.webp)
+That structure lets content remain readable as content. A scene author can describe what should happen in a beat without needing to know how the renderer, audio system, or dungeon engine implements it.
 
-## Expressive 3D storytelling
+## Story content is data-driven
 
-Characters are rendered as live VRM models rather than static sprites. They support:
+Story content is organized into route and scene modules. The route registry discovers scene files automatically, so a new chapter can be added without hard-coding another branch into the main player. The active route, scene, and beat are resolved from a persistent Zustand store.
 
-* Runtime expressions, active speakers, facial effects, and animation states.
-* Procedural idle motion—breathing, head movement, eye motion, and posture shifts.
-* Voice-driven lip sync with generated character voices and fallback behavior for unvoiced dialogue.
-* Runtime attachments for props and accessories, including bone-relative transforms.
+Each beat can define:
 
-The presentation layer also supports branching choices, scene jumps, background effects, sound effects, BGM, affection flags, look-ahead asset preloading, and characters that remain visible while a minigame runs in a windowed dialogue layout.
+* Dialogue, narration, speaker focus, and voice audio.
+* Character positions, expressions, animations, facial effects, and attached props.
+* Backgrounds, BGM, sound effects, cinematic settings, and minigames.
+* Choices that jump to another beat or scene.
+* Flags that can represent relationship values or other evolving story state.
 
-## Cinematic scene system
+Visual state is also designed to be composable. Backgrounds, music, cinematic settings, and characters can persist across beats until the story explicitly changes or resets them. That makes long conversations much easier to author while keeping the player-facing presentation continuous.
 
-Story beats can become authored cinematic compositions with layered backgrounds and foregrounds, parallax, camera motion, shader styles, particles, screen effects, and optional post-processing. A live cinematic editor exposes scene settings and effect controls while the game is running, making visual iteration much faster than editing static screenshots by hand.
+<video controls loop muted playsInline preload="metadata" poster="/projects/visual-novel/dialogue-preview.webp" className="w-full rounded-xl" src="/projects/visual-novel/dialogue-preview.mp4">
+  Your browser does not support embedded video. [View the dialogue preview](/projects/visual-novel/dialogue-preview.mp4).
+</video>
 
-![Layered cinematic scene preview](/projects/visual-novel/cinematic-preview.webp)
+## Characters are live 3D subjects
 
-The renderer has both **WebGPU and WebGL paths**, quality profiles, adaptive pixel ratios, and surface-scoped post-processing for effects such as saturation, vignette, bloom, and SMAA. Asset cleanup, caching, and dungeon preloading keep transitions responsive as the scene changes from conversation to exploration.
+Dialogue scenes use live **VRM characters** instead of static portraits or sprites. The models are rendered through Three.js and React Three Fiber, which allows a character to remain a real scene object while still behaving like a visual-novel actor.
 
-## Playable systems inside the story
+The character layer supports:
 
-The engine currently registers several playable formats: crystal decryption, alphabet collection, maze exploration, spell casting with drawing recognition, and a procedural dungeon.
+* Runtime expressions, active-speaker emphasis, facial effects, and animation states.
+* Procedural idle motion such as breathing, head movement, eye motion, and posture shifts.
+* Voice-driven lip sync, with a fallback animation path for unvoiced dialogue.
+* Bone-attached props and accessories with authored position, rotation, and scale.
+* Character-specific lighting looks for dialogue, cinematic, and gameplay contexts.
 
-The dungeon has grown into a small combat framework rather than a placeholder prototype. It combines seeded procedural layouts, first-person exploration, objectives, collectibles, minimaps, enemy presets, party members, and a unified attack pipeline. Skills can target grid patterns, apply damage-over-time and status effects, spawn enemies, chain into multi-phase sequences, and resolve through distinct projectile, fireball, lightning, tsunami, sword-swing, and explosion effects.
+This makes a character more than a visual asset. The same subjects can appear in a conversation, carry props into the dungeon, retain stateful presentation, and transition into gameplay without being replaced by a different representation.
+
+## Cinematics are authored compositions, not screenshots
+
+Story beats can become complete cinematic compositions with layered backgrounds and foregrounds, parallax, authored camera framing, lighting, shader styles, particles, procedural skies, world objects, and optional post-processing.
+
+The cinematic format is versioned and JSON-compatible. A shot can describe its subjects, camera, environment, lighting, effects, and post-processing in one exportable asset. This makes visual direction reproducible and gives the project a foundation for a proper scene-authoring workflow instead of relying on one-off code edits.
+
+<video controls loop muted playsInline preload="metadata" poster="/projects/visual-novel/cinematic-preview.webp" className="w-full rounded-xl" src="/projects/visual-novel/cinematic-preview.mp4">
+  Your browser does not support embedded video. [View the cinematic preview](/projects/visual-novel/cinematic-preview.mp4).
+</video>
+
+A live cinematic editor exposes shot, camera, subject, world, lighting, post-processing, and particle controls while the game is running. That shortens the iteration loop: composition can be adjusted in context, previewed immediately, and exported back into the authored shot format.
+
+## When dialogue becomes gameplay
+
+The runtime currently supports two distinct playable directions: gesture-based spell casting and a much larger procedural dungeon system. Both are registered as minigames and return control to the story flow when they complete.
+
+### Spell casting through gesture recognition
+
+The spell-casting system turns drawing into a gameplay input. Players draw runes, the gesture recognizer identifies their shapes, and the result is scored across accuracy, complexity, size, and elemental variety.
+
+The system supports Fire, Water, Earth, and Air runes, elemental combinations, ritual conditions, and distinct success or failure states. It is designed to make the player’s input part of the fiction: the spell is not selected from a menu, it is constructed by hand.
+
+### A procedural dungeon with real combat
+
+The dungeon has grown into a compact action-combat framework rather than a placeholder prototype. It combines:
+
+* Seeded procedural layouts with rooms, corridors, themed decoration, and boss routes.
+* First-person exploration, objectives, collectibles, interactive props, and minimaps.
+* Enemy presets with weighted skills, cooldowns, distance checks, health phases, and boss behavior.
+* Party abilities that use the same character and combat-state pipeline as the story scenes.
+* Grid-based attack patterns with telegraphs, dodge windows, multi-wave attacks, and chained sequences.
+* Status effects, armor, enemy spawning, run upgrades, and encounter state.
+* Dedicated visual effects for projectiles, fireballs, lightning, explosions, sword swings, tsunami attacks, and more.
+
+Combat is split into two deliberately separate concerns. The combat engine resolves targets, timing, damage, and status effects. Visual components then present that result through the appropriate effect. That separation makes the system extensible: a new attack can change how it looks without rewriting the rules that determine what it does.
+
+## Rendering built for transitions
+
+The project has both **WebGPU and WebGL renderer paths**. WebGPU enables the more advanced cinematic and particle work, while WebGL provides a compatibility path for devices where WebGPU is unavailable or unstable.
+
+The rendering architecture also accounts for the difficult parts of mixing HTML UI and real-time 3D:
+
+* Story surfaces use their own camera and viewport so dialogue UI and 3D content can coexist cleanly.
+* Post-processing is scoped to the active surface instead of leaking between scenes.
+* Renderer quality profiles adjust pixel ratio and expensive effects.
+* Upcoming characters, backgrounds, world assets, and dungeon data can be preloaded before the next beat appears.
+* VRM and Three.js caches are cleared deliberately at route and scene boundaries.
+
+These details are mostly invisible when they work, but they are what make a transition from conversation to exploration feel like a game rather than a sequence of disconnected demos.
 
 ## Stack
 
-* **React + Zustand** — story flow, branching state, choices, flags, and UI.
-* **Three.js / React Three Fiber / Drei** — VRM characters, environments, cameras, effects, and minigames.
-* **WebGPU with WebGL fallback** — modern rendering with a compatibility path.
-* **Tauri** — lightweight native desktop packaging.
-* **Pixiv VRM + VRoid Studio** — runtime characters and custom anime-style models.
-* **VoiceBox + Qwen3-TTS** — generated character voices connected to lip sync.
+* **React 19 + TypeScript** — application structure, content contracts, and UI.
+* **Zustand** — persistent story progress, flags, audio settings, renderer settings, and dungeon state.
+* **Three.js + React Three Fiber + Drei** — VRM characters, cameras, environments, world objects, effects, and minigames.
+* **Pixiv VRM + MToon** — anime-style character rendering and model-side looks.
+* **WebGPU + WebGL** — modern shader-driven rendering with a compatibility path.
+* **Three TSL / node materials** — procedural skies, particles, and custom visual effects.
+* **Tailwind CSS + Lucide** — interface styling and lightweight UI iconography.
+* **Tauri 2 + Rust** — native desktop packaging for the game runtime.
 
-The project is still evolving toward its full story. The engine foundation is now in place: authored narrative content, cinematic presentation, and interactive gameplay all share the same state, rendering, and asset pipeline.
+The project also includes a library of VRM models, GLB props and enemies, BVH animations, VRoid poses, backgrounds, HDR environments, voice assets, music, and combat sound effects.
+
+## Current state
+
+The engine foundation is now in place and the current build already connects authored narrative content to cinematic presentation and playable combat. The main story currently covers the introduction, the party’s first mission, and their arrival at the Adventurer’s Guild, with the dungeon encounter serving as the first major gameplay transition. A side-story route and additional narrative branches are in progress.
+
+The next layer of work is content and polish: expanding the story, completing unfinished introductions, adding meaningful choice-driven outcomes, and continuing to refine the renderer and combat presentation. The important part is that those additions now have a shared runtime to build on.
+
+The long-term goal is not to make a visual novel that occasionally launches a minigame. It is to make a story-driven game where conversation, cinematics, exploration, and combat all feel like different expressions of the same world.

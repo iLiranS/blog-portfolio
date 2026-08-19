@@ -121,44 +121,42 @@ export function TableOfContents({ headings }: TableOfContentsProps) {
       {headings.map((heading, index) => {
         const isActive = activeId === heading.id
 
-        // Base width in px before scaleX transformation
-        let basePx = 32 // w-8 = 2rem = 32px
-        let barWidthClass = "w-8"
-        if (isActive) {
-          if (heading.level === 3) {
-            basePx = 32 // w-8
-            barWidthClass = "w-8"
-          } else if (heading.level === 4) {
-            basePx = 20 // w-5
-            barWidthClass = "w-5"
-          } else {
-            basePx = 48 // w-12 = 3rem = 48px
-            barWidthClass = "w-12"
-          }
-        } else {
-          if (heading.level === 3) {
-            basePx = 20 // w-5
-            barWidthClass = "w-5"
-          } else if (heading.level === 4) {
-            basePx = 12 // w-3
-            barWidthClass = "w-3"
-          }
+        // Tree depth determines bar width and height strictly by level
+        let basePx = 36
+        let barWidthClass = "w-9"
+        let barHeightClass = "h-[3px]"
+        let textSizeClass = "text-xs"
+
+        if (heading.level === 3) {
+          basePx = 20
+          barWidthClass = "w-5"
+          barHeightClass = "h-[2px]"
+          textSizeClass = "text-[11px]"
+        } else if (heading.level >= 4) {
+          basePx = 12
+          barWidthClass = "w-3"
+          barHeightClass = "h-[1.5px]"
+          textSizeClass = "text-[10px]"
         }
 
         // Dock effect calculation (hovered item and up to 2 items away)
         let scale = 1
+        let distance: number | null = null
         if (hoveredIndex !== null) {
-          const distance = Math.abs(hoveredIndex - index)
+          distance = Math.abs(hoveredIndex - index)
           if (distance === 0) {
-            scale = 1.75
+            scale = 1.35
           } else if (distance === 1) {
-            scale = 1.4
-          } else if (distance === 2) {
             scale = 1.15
+          } else if (distance === 2) {
+            scale = 1.05
           }
         }
 
         const effectiveLineWidth = basePx * scale
+
+        const isHovered = distance === 0
+        const isNeighbor = distance === 1
 
         return (
           <a
@@ -171,10 +169,12 @@ export function TableOfContents({ headings }: TableOfContentsProps) {
             {/* Visual line representation */}
             <div
               className={cn(
-                "h-[3px] rounded-full origin-right transition-transform duration-200 ease-out",
+                "rounded-full origin-right transition-all duration-200 ease-out",
+                barHeightClass,
+                barWidthClass,
                 isActive
-                  ? `bg-primary ${barWidthClass}`
-                  : `bg-muted-foreground/30 group-hover:bg-muted-foreground/75 ${barWidthClass}`
+                  ? "bg-primary"
+                  : "bg-muted-foreground/25 group-hover:bg-muted-foreground/50"
               )}
               style={{
                 transform: `scaleX(${scale})`,
@@ -184,8 +184,14 @@ export function TableOfContents({ headings }: TableOfContentsProps) {
             {/* Title on the left (positioned from the right anchor) */}
             <span
               className={cn(
-                "absolute right-0 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase tracking-wider transition-all duration-200 ease-out pointer-events-none select-none block truncate text-right opacity-0 translate-x-2 max-w-0 group-hover:opacity-100 group-hover:translate-x-0 group-hover:max-w-[150px]",
-                isActive ? "text-primary" : "text-muted-foreground/70"
+                "absolute right-0 top-1/2 -translate-y-1/2 tracking-wide transition-all duration-200 ease-out pointer-events-none select-none block truncate text-right",
+                textSizeClass,
+                isHovered
+                  ? "opacity-90 translate-x-0 max-w-55 font-medium text-foreground/90"
+                  : isNeighbor
+                    ? "opacity-45 translate-x-0 max-w-55 font-normal text-muted-foreground"
+                    : "opacity-0 translate-x-2 max-w-0",
+                isActive && "text-primary font-medium"
               )}
               style={{
                 marginRight: `${effectiveLineWidth + 10}px`,
