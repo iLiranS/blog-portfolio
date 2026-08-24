@@ -140,11 +140,8 @@ export default async function Blog({ params }: BlogPageProps) {
 
           {/* Table of Contents - Outside container on desktop */}
           {headings.length > 0 && (
-            <aside className="hidden lg:block absolute left-full ml-10 xl:ml-16 top-0 bottom-0 w-48">
+            <aside className="hidden min-[1120px]:block absolute left-full ml-3.5 min-[1200px]:ml-6 xl:ml-8 2xl:ml-12 top-0 bottom-0 w-40 min-[1200px]:w-48 xl:w-54 2xl:w-60">
               <div className="sticky top-28">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50 mb-3 text-right pr-2">
-                  On this page
-                </p>
                 <TableOfContents headings={headings} />
               </div>
             </aside>

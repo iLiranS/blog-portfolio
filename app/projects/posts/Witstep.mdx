@@ -1,0 +1,39 @@
+---
+title: 'Witstep — A Playful Puzzle Journey'
+publishedAt: '2026-08-24'
+summary: 'A polished daily puzzle experience built around an extensible puzzle engine, guided journeys, and local-first progress.'
+---
+
+**[Play Witstep](https://witstep.vercel.app)** 
+
+![Witstep home screen and daily puzzle](/projects/witstep/hero.webp)
+
+Witstep is a free collection of bite-sized logic and math puzzles designed to make a few minutes of focused thinking feel inviting. I wanted the experience to sit somewhere between a daily ritual and a small adventure: approachable enough to open on a break, but structured enough to reward coming back.
+
+The product has two complementary paths. **Daily** offers one fresh challenge and keeps a lightweight streak, while **Journey** lets players explore themed collections at their own pace—from number sequences and equations to logic riddles, constraint puzzles, visual number sense, and matchstick challenges.
+
+## One player, many kinds of puzzle
+
+The central technical challenge was supporting very different interactions without rebuilding the surrounding experience each time. Witstep uses typed puzzle definitions and a renderer registry to connect each puzzle kind to its own interface. A shared player coordinates selection, validation, hints, feedback, explanations, completion, and navigation.
+
+This keeps the experience consistent for players while allowing each puzzle to behave naturally. A sequence can use fillable slots, an equation can evaluate a completed expression, and an arrangement puzzle can offer direct manipulation—all inside the same lifecycle. Adding a new puzzle type is mostly a matter of defining its data contract, evaluator, and renderer rather than creating another standalone page.
+
+## Making puzzle content trustworthy
+
+Constraint puzzles are deceptively difficult to author: a clue can be invalid, redundant, or accidentally allow several answers. I built the rules as structured data and paired the runtime evaluator with a small solver and validation tool.
+
+The tool enumerates candidate arrangements, reports how many solutions exist, catches malformed rules, and warns when removing a clue does not change the solution set. That turns content quality into something testable, not just something checked by hand, and lets the puzzle library grow with much more confidence.
+
+![A Witstep journey map and interactive puzzle](/projects/witstep/journey.webp)
+
+## Progress without account friction
+
+Witstep deliberately starts without sign-up. Journey completion and daily streaks are stored locally with a versioned Zustand store, so a player can begin immediately and return where they left off. Repository boundaries keep puzzle content and progress storage separate from the UI, leaving a clear route to a remote backend later without coupling the current experience to one.
+
+The interface adds the details that make a small game feel considered: tactile controls, drag-and-drop interactions, progressive hints, clear solve states, sound feedback, a responsive layout, light and dark themes, and a friendly mascot that acts as a guide rather than decoration.
+
+## Built with
+
+Witstep is built with **Next.js 16**, **React 19**, **TypeScript**, **Tailwind CSS**, **shadcn/ui**, **Zustand**, and **dnd-kit**. The puzzle engine, progress rules, renderers, and core interactions are covered by a Vitest and Testing Library test suite.
+
+The result is a compact product with a deliberately extensible core: easy to start playing, pleasant to revisit, and ready to support new puzzle formats as the journey expands.
