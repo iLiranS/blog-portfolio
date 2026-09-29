@@ -11,7 +11,7 @@ export default function ProjectPosts({ amount, featured }: ProjectPostsProps) {
   let allProjects = getProjectPosts()
 
   if (featured) {
-    const featuredSlugs = ["Annota", "visual-novel", "Witstep"]
+    const featuredSlugs = ["Annota", "visual-novel", "Merubys-Wish"]
     allProjects = featuredSlugs
       .map((slug) => allProjects.find((p) => p.slug.toLowerCase() === slug.toLowerCase()))
       .filter((p): p is NonNullable<typeof p> => p !== undefined)

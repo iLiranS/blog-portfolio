@@ -1,0 +1,42 @@
+---
+title: "Meruby's Wish"
+publishedAt: '2026-09-29'
+summary: 'A 3D action-adventure prototype built in Godot 4, featuring modular attack data, emotion-driven skill gauges, and token-coordinated enemy encounters.'
+image: '/projects/meruby/preview.webp'
+---
+
+<video controls loop muted playsInline preload="metadata" poster="/projects/meruby/preview.webp" className="w-full rounded-xl" src="/projects/meruby/preview.mp4">
+  Your browser does not support embedded video. [View the gameplay preview](/projects/meruby/preview.mp4).
+</video>
+
+## Overview
+
+**Meruby's Wish** is a 3D action combat prototype built with **Godot 4** and **Jolt Physics**. The project focuses on responsive third-person melee mechanics, modular attack resource pipelines, and clean encounter orchestration.
+
+---
+
+## Combat Systems
+
+The combat framework is structured around modular, data-driven attack resources and dynamic gauge management:
+
+* **Data-Driven Attack Definitions**: Combos are authored via reusable `AttackDefinition` resources defining spatial collision shapes, windup/active/recovery timings, early cancel windows for dodging, knockback vectors, and aerial juggle physics.
+* **4-Emotion Gauge & Skill Casts**: Real-time cycling between 4 distinct emotion meters (Rage, Happy, Romantic, Sad). Reaching full charge unlocks active casts with unique weapon trail VFX palettes and properties.
+* **Keystone Empowerments**: Progression unlocks Tier 2 empowered skill variants, such as cataclysmic meteor smashes, high-gravity singularity pulls, flurry dashes, and persistent glacial freeze zones.
+
+---
+
+## Enemy AI & Encounter Systems
+
+Enemies are built to provide structured, readable combat rather than chaotic group swarming:
+
+* **Token-Based Attack Coordination**: Enemies claim shared `melee` and `range` attack tokens before striking, preventing unfair simultaneous hits while allowing bosses to dynamically bypass token constraints.
+* **Attack Variations & Patterns**: Support for directional melee strikes with hyper armor, telegraph indicators for floor beams, cascading AoE drops, and procedural projectile patterns (single shots, fan spreads, rings, and spirals).
+* **State & Condition Logic**: Attack selection evaluates distance, line of sight, group cooldowns, health thresholds, and selection weights.
+
+---
+
+## Tech Stack
+
+* **Engine**: Godot 4.x (Forward+ Renderer)
+* **Physics**: Godot Jolt (3D Physics)
+* **Avatars & Shaders**: VRM model pipeline, MToon shading, custom visual effect shaders
