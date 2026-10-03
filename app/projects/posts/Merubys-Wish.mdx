@@ -1,7 +1,7 @@
 ---
 title: "Meruby's Wish"
 publishedAt: '2026-09-29'
-summary: 'A 3D action-adventure prototype built in Godot 4, featuring modular attack data, emotion-driven skill gauges, and token-coordinated enemy encounters.'
+summary: 'A 3D action-adventure prototype built in Godot 4, featuring a 3-layer combat pipeline, radial progression tree, procedural manga/anime environment shading, and coordinated encounter design.'
 image: '/projects/meruby/preview.webp'
 ---
 
@@ -9,34 +9,57 @@ image: '/projects/meruby/preview.webp'
   Your browser does not support embedded video. [View the gameplay preview](/projects/meruby/preview.mp4).
 </video>
 
+> **Note:** This project is actively in development. Systems, visual styling, and balance are continuously evolving.
+
 ## Overview
 
-**Meruby's Wish** is a 3D action combat prototype built with **Godot 4** and **Jolt Physics**. The project focuses on responsive third-person melee mechanics, modular attack resource pipelines, and clean encounter orchestration.
+**Meruby's Wish** is a high-tempo 3D action combat prototype built with **Godot 4** and **Jolt Physics**. The project emphasizes responsive third-person melee and ranged combat, tight animation canceling, modular progression mechanics, and distinct stylized toon visuals.
 
 ---
 
-## Combat Systems
+## Combat & Multi-Weapon Pipeline
 
-The combat framework is structured around modular, data-driven attack resources and dynamic gauge management:
+Combat is built on a clean **3-layer pipeline** designed for punchy feedback and clear build identity:
 
-* **Data-Driven Attack Definitions**: Combos are authored via reusable `AttackDefinition` resources defining spatial collision shapes, windup/active/recovery timings, early cancel windows for dodging, knockback vectors, and aerial juggle physics.
-* **4-Emotion Gauge & Skill Casts**: Real-time cycling between 4 distinct emotion meters (Rage, Happy, Romantic, Sad). Reaching full charge unlocks active casts with unique weapon trail VFX palettes and properties.
-* **Keystone Empowerments**: Progression unlocks Tier 2 empowered skill variants, such as cataclysmic meteor smashes, high-gravity singularity pulls, flurry dashes, and persistent glacial freeze zones.
+* **Innate Weapon Passives & Tier Scaling**: Four distinct weapons across emotional affinities—Verdant Katana (*Happy* / sustain & speed), Twin Pistols (*Rage* / raw damage & crit), Shock Gauntlets (*Romantic* / weakness & chain lightning), and Glacial Scythe (*Sad* / crowd-control slow). Weapons scale across Pod Tiers (T1–T3) with shifting damage multipliers and execution thresholds.
+* **Modular Attack Definitions**: Combos are authored via modular Godot resources defining 3D hitbox shapes, windup/active/recovery timings, dash-cancel windows, directional knockback, and aerial juggle mechanics.
+* **Weapon-Isolated Perfect Dodge Surges**: Timing a precise dodge triggers a brief 2.5-second burst effect that strictly matches the currently held weapon (e.g., $+50\%$ counter damage on Pistols, guaranteed shock arcs on Gauntlets, or swift heals on Katana).
+* **Skills & Ultimate Climax**: A shared ability system featuring standard 10-second cooldown skills alongside a 100% charged Climax state for devastating area-of-effect ultimates.
+
+---
+
+## Progression Web
+
+Character growth centers around a radial **DAG (Directed Acyclic Graph) Progression Tree**:
+
+* **Weapon Affinity Branches**: Players spend collected essence to unlock specialized nodes across each of the 4 weapons, boosting weapon damage, critical rate/damage, elemental status potencies, and tier odds.
+* **General Vitality & Defense**: Central survival upgrades including max health scaling, Second Chance revive mechanics, and essence fortune bonuses.
+* **Strict Buff Isolation**: Weapon bonuses and status effects remain strictly tied to their respective weapon identity to prevent unintended stat cross-contamination.
+
+---
+
+## Stylized Environment Shading & Art Direction
+
+The visual aesthetic blends anime cel-shading with expressive manga ink techniques using custom Godot spatial shaders (`environment_toon.gdshader`):
+
+* **Manga Ink Hatching & Outlines**: Procedural cross-hatching responding to dynamic light thresholds, paired with depth/normal crease edge detection for crisp illustrated outlines.
+* **Architectural & Material Roles**: Dedicated shader palettes for buildings, facades, structural framing, roofs, and modular floor tiles with localized ambient occlusion and surface weathering.
+* **Foliage & Wind Dynamics**: Vertex-animated grass and trees with stylized wind sways integrated directly into the toon lighting model.
 
 ---
 
 ## Enemy AI & Encounter Systems
 
-Enemies are built to provide structured, readable combat rather than chaotic group swarming:
+Enemies provide structured, readable combat rather than chaotic group swarming:
 
-* **Token-Based Attack Coordination**: Enemies claim shared `melee` and `range` attack tokens before striking, preventing unfair simultaneous hits while allowing bosses to dynamically bypass token constraints.
-* **Attack Variations & Patterns**: Support for directional melee strikes with hyper armor, telegraph indicators for floor beams, cascading AoE drops, and procedural projectile patterns (single shots, fan spreads, rings, and spirals).
-* **State & Condition Logic**: Attack selection evaluates distance, line of sight, group cooldowns, health thresholds, and selection weights.
+* **Token-Based Coordination**: Shared melee and ranged attack tokens prevent unfair concurrent hits, maintaining clear cadence during multi-enemy waves while allowing bosses to bypass limits.
+* **Telegraphed Hazard Patterns**: Directional strikes with hyper-armor cues, floor telegraph projections, falling AoE hazards, and procedural projectile formations (fans, spirals, and rings).
+* **Dynamic Decision Logic**: Tactical evaluation based on distance, line of sight, group cooldowns, and behavioral state machines.
 
 ---
 
 ## Tech Stack
 
-* **Engine**: Godot 4.x (Forward+ Renderer)
+* **Engine**: Godot 4.x (Forward+ Mobile/Desktop Renderer)
 * **Physics**: Godot Jolt (3D Physics)
-* **Avatars & Shaders**: VRM model pipeline, MToon shading, custom visual effect shaders
+* **Shaders & Pipeline**: Custom spatial toon & manga shaders, VRM avatar pipeline, MToon integration
