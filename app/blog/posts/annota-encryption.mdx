@@ -37,6 +37,7 @@ graph TD
     
 2.  **Argon2id (Memory Hard Key Derivation)**: The 64-byte seed is stretched using **Argon2id** (via [**deriveKeyFromMnemonic**](https://github.com/iLiranS/Annota/blob/28b8d74107c51833e00b0f6c831021ccb3eaab15/core/src/utils/crypto.ts#L162)) with a device-specific `salt` (decoded from the user's `saltHex` string).
     
+    *   **Native Performance**: Because running memory-hard Argon2id (64MB) and continuous AES-256-GCM in JavaScript would freeze the UI thread, operations run through native bindings: **C++ JSI via `react-native-quick-crypto` on mobile** and **native Rust Tauri IPC on desktop**, keeping crypto operations near bare-metal speed.
     *   **Argon2 Settings**:
         
         *   `memory`: 65,536 KiB (64 MB)

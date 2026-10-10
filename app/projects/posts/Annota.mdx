@@ -15,6 +15,15 @@ Check out the [Annota GitHub Repository](https://github.com/iLiranS/Annota) to e
 
 ---
 
+## 🏛 Architecture: Hexagonal Monorepo Core
+
+Annota uses a **Port-and-Adapter (Hexagonal)** monorepo architecture (`pnpm-workspace`):
+- **`@annota/core`**: 100% platform-agnostic TypeScript containing domain models, Drizzle ORM schemas, state stores, services, sync managers, and cryptographic interfaces. Zero imports from React Native, Expo, or Tauri.
+- **Inversion of Control (`PlatformAdapters`)**: Both mobile and desktop implement abstract platform ports. Mobile injects native C++ crypto and file APIs, while desktop injects WebCrypto and Rust bindings. Fixing a bug or adding a feature in core immediately benefits both platforms.
+- **Sandboxed Editor Core (`@annota/editor-core`)**: The TipTap/ProseMirror engine, AST parsers, KaTeX math, Mermaid rendering, and custom extensions operate in an isolated package communicating via a bi-directional JSON bridge.
+
+---
+
 ## 🚀 Key Features
 
 ### 📝 The Rich-Text Editor
@@ -47,8 +56,8 @@ Annota protects user data at rest and in transit through a robust cryptographic 
 
 ### 1. Key Derivation & Isolation
 Every user workspace derives keys starting from a 12-word BIP39 mnemonic seed:
-- The mnemonic is stored encrypted at rest using platform secure keychains.
-- Upon unlock, the mnemonic is stretched to a **256-bit symmetric Master Key** via **Argon2id** (64MB memory, 2 passes, 1 thread).
+- The mnemonic is stored encrypted at rest inside device secure storage (iOS Keychain, Android Keystore, Tauri Secure Store).
+- Upon unlock, the mnemonic is stretched to a **256-bit symmetric Master Key** via **Argon2id** (64MB memory, 2 passes, 1 thread). To avoid freezing JavaScript threads, this executes via **native C++ JSI (`react-native-quick-crypto`) on mobile** and **native Rust IPC on desktop**.
 - **HKDF-SHA256** is then used to derive isolated subkeys:
   - `notesKey`: Encrypts note titles, folders, metadata, and HTML contents.
   - `filesKey`: Encrypts raw binary attachments (images, PDFs, etc.).
@@ -57,18 +66,21 @@ For a step-by-step cryptographic walkthrough, see:
 👉 [Architecture Walkthrough: Annota Encryption](/blog/annota-encryption)
 
 ### 2. Encryption at Rest (Local-First)
-Even when fully offline, your workspace database is encrypted at rest using **SQLCipher**, protecting your notes against physical device theft or direct database inspection.
+Even inside the OS secure keychain (`expo-secure-store`), the 12-word mnemonic is never saved in plain text. It is encrypted at rest using AES-256-GCM via a device-derived context key (`encryptAtRest`), protecting master seeds even against physical device inspection.
 
 ### 3. File Insertion & Compression
-- **Smart Reference Reuse**: Files are hashed on insertion. If you attach an image or PDF that already exists in your workspace, Annota reuses the reference rather than uploading it multiple times.
-- **Local Compression**: Images are compressed locally before encryption, dramatically reducing sync overhead without compromising visual usability.
-- **Direct Binary GCM**: Attachment binaries are encrypted with **AES-256-GCM**. To save 33% overhead, the client bypasses Base64 encoding and appends the 16-byte authentication tag directly onto the end of the ciphertext bytes.
+- **Double Hashing Deduplication**: Assets track both raw `sourceHash` (preventing redundant re-compression on repeated imports) and `compressedHash` (avoiding redundant cloud downloads).
+- **Local WebP Compression**: Images are resized and compressed locally to WebP before encryption, dramatically reducing sync overhead.
+- **Direct Binary GCM**: Attachment binaries are encrypted with **AES-256-GCM**. To eliminate 33% Base64 inflation and mobile memory pressure, the client appends the 16-byte authentication tag directly onto the ciphertext bytes and streams raw binary directly to storage.
 
 ---
 
 ## 🔄 Cloud Sync & Backend Infrastructure
 
 Annota's optional cloud sync system operates deterministically on **Supabase** (Postgres + S3 Buckets). The server is completely blind to raw plaintext data.
+
+For a detailed breakdown of the synchronization scheduler, debouncing, and tombstone lifecycle:
+👉 [Architecture Walkthrough: Annota Synchronization](/blog/annota-sync)
 
 ```mermaid
 sequenceDiagram
@@ -88,9 +100,9 @@ sequenceDiagram
 - **Row-Level Security (RLS)**: Enforces strict tenant isolation. Users can only read, write, or query their own rows.
 - **Profile Protection Triggers**: Database triggers prevent clients from changing sensitive fields like `role` or `storage_used_bytes` directly, requiring validation via Supabase edge functions.
 - **Tier-based Limits**: An database trigger function enforces limits before inserts occur:
-  - **Free Tier**: Limited to 100 notes, 20 folders, and 20 tags.
+  - **Free Tier**: Limited to 50 notes, 10 folders, and 10 tags.
   - **Pro/Beta Tiers**: Allowed up to 7,500 notes, 1,000 folders, and 1,000 tags.
-- **Tombstones & Garbage Collection**: Soft-deleted notes/folders are cleaned up automatically via Postgres scheduled cron tasks. Encrypted data is stripped (shredded to empty strings) after 7 days, and tombstones are fully purged after 3 months.
+- **Tombstones & Garbage Collection**: Soft-deleted notes/folders are cleaned up automatically via Postgres scheduled cron tasks (`pg_cron`). Encrypted data is stripped (shredded to empty strings) after 7 days, and tombstones are fully purged after 3 months.
 - **Orphaned File Cleaner**: Periodically identifies and sweeps files in S3 storage that no longer have mapping references inside the `note_files` table.
 
 ### 🌐 Public Web Publishing

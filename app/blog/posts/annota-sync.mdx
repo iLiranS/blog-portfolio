@@ -6,7 +6,7 @@ summary: "How I built the synchronization architecture for Annota"
 ## Architecture Walkthrough: Annota Synchronization
 
 > This note is a walkthrough of the synchronization architecture in Annota, detailing how data flows between the local-first SQLite database and the cloud while maintaining strict end-to-end encryption.  
-> If you haven't read about how we lock down the data first, check out the [Architecture Walkthrough: Annota Encryption](https://annota.online/notes/0e0a1841-bc4d-4d44-82a9-9b5db25b7883) note. This covers the core logic found in our [Sync Scheduler](https://github.com/iLiranS/Annota/blob/1817047c6827e822ef896a5e2e815f4835d7e772/core/src/sync/sync-scheduler.ts), [Sync Service](https://github.com/iLiranS/Annota/blob/1817047c6827e822ef896a5e2e815f4835d7e772/core/src/sync/sync-scheduler.ts), and [File Sync Service](https://github.com/iLiranS/Annota/blob/1817047c6827e822ef896a5e2e815f4835d7e772/core/src/sync/sync-scheduler.ts).
+> If you haven't read about how we lock down the data first, check out the [Architecture Walkthrough: Annota Encryption](/blog/annota-encryption) note. This covers the core logic found in our [Sync Scheduler](https://github.com/iLiranS/Annota/blob/1817047c6827e822ef896a5e2e815f4835d7e772/core/src/sync/sync-scheduler.ts), [Sync Service](https://github.com/iLiranS/Annota/blob/1817047c6827e822ef896a5e2e815f4835d7e772/core/src/sync/sync-scheduler.ts), and [File Sync Service](https://github.com/iLiranS/Annota/blob/1817047c6827e822ef896a5e2e815f4835d7e772/core/src/sync/sync-scheduler.ts).
 
 ### Step 1: The Sync Scheduler (Timing is Everything)
 
@@ -57,6 +57,8 @@ Pulling data down via `performSyncPull` relies on **Cursor-Based Pagination** to
     
 3.  **Batch Decryption**: Incoming cloud items are pulled in batches of 15. They are decrypted in memory, parsed, and then safely upserted into the local database inside an atomic transaction.
     
+4.  **Conflict Resolution & Safety Net**: Changes are resolved using a **Last-Write-Wins (LWW)** strategy keyed on `updated_at`. To prevent silent data loss when a remote sync overwrites local changes, Annota automatically snapshots the pre-update content into an immutable local `note_versions` table before applying the incoming update. If a user ever finds that an offline collision wiped recent thoughts, they can restore any previous version directly from the version history menu.
+    
 
 ### Step 4: File Syncing (The Heavy Lifting)
 
@@ -74,7 +76,7 @@ graph TD
     G --> H[Process Queue]
 ```
 
-1.  **Intelligent Local Diffing**: When new notes are pulled and decrypted, we extract the file IDs directly from the note content (e.g. image tags). Rather than making a remote network call to query a bridge table like `note_files` during pull, the sync service compares these extracted IDs against the file IDs of the note's previous local version. We only download files that are actually new to this device, skipping any extra API calls for notes with unchanged files.
+1.  **Intelligent Local Diffing & Deduplication**: When new notes are pulled and decrypted, we extract the file IDs directly from the note content (e.g. image tags). Rather than making a remote network call to query a bridge table like `note_files` during pull, the sync service compares these extracted IDs against the file IDs of the note's previous local version. Furthermore, uploads implement a double-hashing pipeline (`sourceHash` on raw input, `compressedHash` post-compression): if the user re-pastes an identical image into multiple notes, the upload is skipped entirely and points to the existing file.
     
 2.  **Cryptographic Nonce Retrieval**: For the files that _are_ missing locally, the app queries the `encrypted_files` table to retrieve their metadata and, most importantly, the cryptographic `nonce` required to decrypt them.
     

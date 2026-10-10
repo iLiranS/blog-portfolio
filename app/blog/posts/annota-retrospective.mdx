@@ -1,0 +1,73 @@
+---
+title: "Lessons Learned Building a Local-First App: The Moral of Markdown"
+publishedAt: "2026-10-11"
+summary: "Reflecting on 400+ commits building Annota — why complex custom sync engines are fun to build, but plain text Markdown wins in the end."
+---
+
+## Retrospective: What 400+ Commits of Local-First Architecture Taught Me
+
+Over several months and roughly 400 commits, I engineered **Annota**—a cross-platform, local-first note-taking application designed for privacy-conscious users. I built it end-to-end: a custom hexagonal TypeScript core, native SQLite storage on iOS and desktop, zero-knowledge end-to-end encryption with Argon2id and AES-256-GCM, native C++ JSI / Rust crypto bridges, and an offline-first synchronization engine backed by Supabase.
+
+It made it all the way to the Apple App Store, macOS, and Windows. 
+
+Building it was one of the most rewarding engineering experiences I've had. It forced me to tackle low-level systems problems: distributed state reconciliation, memory-hard key derivation on mobile constraints, cursor-based pagination, and WebView postMessage serialization bridges.
+
+Yet, once the system was humming in production, I arrived at an unexpected realization:
+
+> **The ultimate note-taking format isn't a proprietary SQLite schema or a rich-text JSON document locked inside an encrypted container. It's plain Markdown files living on your own disk.**
+
+Here is the honest retrospective on what worked, what I would do differently today, and why plain Markdown is hard to beat.
+
+---
+
+### 1. The Engineering Wins
+
+Before diving into the critiques, several architectural decisions proved invaluable:
+
+1. **Hexagonal (Ports & Adapters) Architecture**: Decoupling the business logic from platform APIs (`PlatformAdapters`) allowed us to share 95%+ of the core codebase between Expo (React Native) on iOS and Tauri on macOS/Windows. Swapping native storage or crypto bindings never required rewriting application use-cases.
+2. **Native Crypto Bridges**: Offloading Argon2id key stretching and AES-256-GCM cipher streaming to native C++ JSI (`react-native-quick-crypto`) on iOS and native Rust on Tauri prevented the UI thread from dropping frames during intensive sync cycles.
+3. **Double-Hashing Asset Deduplication**: Hashing files prior to compression (`sourceHash`) and after compression (`compressedHash`) prevented re-uploading identical screenshots and images across notes, saving both user bandwidth and cloud storage costs.
+
+---
+
+### 2. Architectural Trade-offs & What I'd Do Differently
+
+Looking back at the architecture through an experienced lens, there are several patterns I would rethink:
+
+#### A. The Merge Strategy: Last-Write-Wins (LWW) vs. CRDTs
+Annota chose **Last-Write-Wins (LWW)** resolution based on timestamps, backed by an immutable local `note_versions` snapshot table. 
+
+* **Why LWW?** True distributed CRDTs (like Yjs or Automerge) add significant document overhead, complex garbage collection (tombstones), and steep integration hurdles when paired with rich-text editor ASTs. For a solo-user, multi-device note app, simultaneous concurrent typing on the exact same sentence across two devices is rare.
+* **The Reality**: LWW was straightforward, but clock skew between unsynchronized devices is a real edge case. While snapshotting versions before overwriting prevented silent data loss, true peer-to-peer collaboration requires CRDTs from day one.
+
+#### B. Procedural Sync vs. Finite State Machines (FSM)
+The sync scheduler coordinated debounce timers, 2-minute hard limits, app lifecycle transitions (foreground/background), and network reachability changes using procedural flags (`isSyncing`, `syncPending`).
+
+* **The Lesson**: Concurrency and distributed network states are classic state-explosion problems. If I rebuilt the sync engine today, I would model the synchronization lifecycle explicitly using a **Finite State Machine (FSM)** like **XState**. An FSM makes invalid state transitions mathematically impossible and simplifies complex retry/backoff policies.
+
+#### C. Custom In-App AI vs. Model Context Protocol (MCP)
+Annota featured a local AI assistant that performed zero-cloud lexical RAG using SQLite’s native `FTS5` engine and a strict 10,000-token global budgeting system.
+
+* **The Lesson**: Building a bespoke chat UI and conversational state machine inside a note app felt innovative at the time. But AI tooling has shifted dramatically. Today, rather than embedding an AI chat inside the app, the right architecture is exposing an **MCP (Model Context Protocol)** server over your local knowledge base. This allows users to bring their favorite external LLMs (Claude, ChatGPT, local Ollama models) directly to their notes with zero UI bloat.
+
+---
+
+### 3. The Moral of Markdown: Why Plain Text Wins
+
+When you build a rich-text app with TipTap and ProseMirror, content is stored as rich JSON structures or HTML strings inside a relational SQLite database.
+
+It feels modern and slick, but it introduces an inherent layer of friction:
+
+1. **Vendor Lock-in & Data Opacity**: Your thoughts are trapped inside a database file. You cannot easily `grep` them from the terminal, inspect them with standard Unix tools, or script transformations without booting the application or running raw SQL queries.
+2. **AI Tooling Interoperability**: Modern developer workflows and autonomous AI agents thrive on plain text files. An agent can seamlessly read, edit, and organize files in a folder structure. When notes are buried inside encrypted SQLite blobs, outside tooling is shut out.
+3. **Ecosystem & Longevity**: Proprietary sync servers and cloud databases require ongoing maintenance, hosting fees, and database migrations. In contrast, plain `.md` files in a local directory (synced effortlessly via iCloud, Git, or Syncthing) will remain readable 30 years from now.
+
+---
+
+### Final Reflection
+
+Building Annota taught me more about distributed systems, cryptography, and cross-platform mobile performance than any tutorial or theoretical course ever could. It was an ambitious project that pushed my engineering boundaries and shipped to real users.
+
+Today, my personal daily driver for note-taking is **Obsidian**—because it embodies the philosophy I learned the hard way: **tools should serve your data, not own it.**
+
+If you are an engineer planning to build a local-first product: dive deep into the distributed storage, the crypto, and the sync pipelines. The lessons you learn will make you a significantly stronger systems engineer. But always keep simplicity and data ownership at the center of your architecture.
