@@ -140,7 +140,7 @@ export default async function Projects({ params }: ProjectPageProps) {
 
           {/* Table of Contents - Outside container on desktop */}
           {headings.length > 0 && (
-            <aside className="hidden min-[1120px]:block absolute left-full ml-3.5 min-[1200px]:ml-6 xl:ml-8 2xl:ml-12 top-0 bottom-0 w-40 min-[1200px]:w-48 xl:w-54 2xl:w-60">
+            <aside className="hidden min-[1080px]:block absolute left-full ml-2 min-[1200px]:ml-4 xl:ml-6 top-0 bottom-0 w-16 pointer-events-none z-30">
               <div className="sticky top-28">
                 <TableOfContents headings={headings} />
               </div>

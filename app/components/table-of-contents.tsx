@@ -1,12 +1,13 @@
 "use client"
 
-import { useEffect, useState, useRef, useMemo } from "react"
-import { AlignLeft, ArrowUp } from "lucide-react"
+import { useEffect, useState, useRef, useMemo, useCallback } from "react"
+import { Link2, Check } from "lucide-react"
 
 export interface TocItem {
   text: string
   id: string
   level: number
+  snippet?: string
 }
 
 interface TableOfContentsProps {
@@ -17,17 +18,54 @@ interface TableOfContentsProps {
 
 const cn = (...classes: (string | boolean | undefined | null)[]) => classes.filter(Boolean).join(" ")
 
-export function TableOfContents({ headings, title = "On this page", className }: TableOfContentsProps) {
+export function TableOfContents({ headings, className }: TableOfContentsProps) {
   const [activeId, setActiveId] = useState<string>(headings[0]?.id || "")
-  const isClickScrolling = useRef(false)
-  const tocListRef = useRef<HTMLDivElement>(null)
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [popoverPlacement, setPopoverPlacement] = useState<"right" | "left">("right")
+  const [domSnippets, setDomSnippets] = useState<Record<string, string>>({})
 
-  // Find minimum heading level to normalize indentation (e.g. if a post starts with h3)
+  const isClickScrolling = useRef(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const leaveTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const copyTimerRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Find minimum heading level to normalize indicator widths
   const minLevel = useMemo(() => {
     if (headings.length === 0) return 2
     return Math.min(...headings.map((h) => h.level))
   }, [headings])
 
+  // Extract snippet fallback from DOM if not provided
+  useEffect(() => {
+    if (headings.length === 0) return
+
+    const extracted: Record<string, string> = {}
+    headings.forEach((heading) => {
+      if (heading.snippet) {
+        extracted[heading.id] = heading.snippet
+        return
+      }
+
+      const el = document.getElementById(heading.id)
+      if (el) {
+        let sibling = el.nextElementSibling
+        while (sibling) {
+          if (/^H[1-6]$/i.test(sibling.tagName)) break
+          const text = sibling.textContent?.trim()
+          if (text && text.length > 10) {
+            extracted[heading.id] = text.length > 160 ? text.slice(0, 157) + "..." : text
+            break
+          }
+          sibling = sibling.nextElementSibling
+        }
+      }
+    })
+
+    setDomSnippets(extracted)
+  }, [headings])
+
+  // Active section tracking via IntersectionObserver & scroll fallback
   useEffect(() => {
     if (headings.length === 0) return
 
@@ -37,7 +75,6 @@ export function TableOfContents({ headings, title = "On this page", className }:
 
         const visibleEntries = entries.filter((entry) => entry.isIntersecting)
         if (visibleEntries.length > 0) {
-          // Find the heading that is closest to top offset ~100px
           const closest = visibleEntries.reduce((prev, curr) => {
             return Math.abs(curr.boundingClientRect.top - 100) < Math.abs(prev.boundingClientRect.top - 100)
               ? curr
@@ -64,7 +101,7 @@ export function TableOfContents({ headings, title = "On this page", className }:
       const windowHeight = window.innerHeight
       const documentHeight = document.documentElement.scrollHeight
 
-      // When reaching near the bottom of the page, highlight the last heading
+      // Bottom reached
       if (scrollPosition + windowHeight >= documentHeight - 100) {
         setActiveId(headings[headings.length - 1].id)
         return
@@ -98,27 +135,48 @@ export function TableOfContents({ headings, title = "On this page", className }:
     }
   }, [headings])
 
-  // Scroll active link into view inside TOC container if it overflows
-  useEffect(() => {
-    if (!activeId || !tocListRef.current) return
-    const activeEl = tocListRef.current.querySelector<HTMLElement>(`[data-toc-id="${activeId}"]`)
-    if (activeEl) {
-      const container = tocListRef.current
-      const containerRect = container.getBoundingClientRect()
-      const activeRect = activeEl.getBoundingClientRect()
-
-      if (activeRect.top < containerRect.top || activeRect.bottom > containerRect.bottom) {
-        activeEl.scrollIntoView({ block: "nearest", behavior: "smooth" })
-      }
+  // Update popover placement based on viewport space
+  const updatePlacement = useCallback(() => {
+    if (!containerRef.current) return
+    const rect = containerRef.current.getBoundingClientRect()
+    // Need at least 320px on the right for the card
+    if (window.innerWidth - rect.right < 320) {
+      setPopoverPlacement("left")
+    } else {
+      setPopoverPlacement("right")
     }
-  }, [activeId])
+  }, [])
 
-  const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+  useEffect(() => {
+    updatePlacement()
+    window.addEventListener("resize", updatePlacement, { passive: true })
+    return () => window.removeEventListener("resize", updatePlacement)
+  }, [updatePlacement])
+
+  const handleMouseEnterItem = (id: string) => {
+    if (leaveTimerRef.current) {
+      clearTimeout(leaveTimerRef.current)
+      leaveTimerRef.current = null
+    }
+    updatePlacement()
+    setHoveredId(id)
+  }
+
+  const handleMouseLeaveItem = () => {
+    if (leaveTimerRef.current) clearTimeout(leaveTimerRef.current)
+    leaveTimerRef.current = setTimeout(() => {
+      setHoveredId(null)
+    }, 150)
+  }
+
+  const handleScrollTo = (e: React.MouseEvent, id: string) => {
     e.preventDefault()
+    e.stopPropagation()
     const el = document.getElementById(id)
     if (el) {
       isClickScrolling.current = true
       setActiveId(id)
+      setHoveredId(null)
 
       const headerOffset = 90
       const elementPosition = el.getBoundingClientRect().top
@@ -139,13 +197,19 @@ export function TableOfContents({ headings, title = "On this page", className }:
     }
   }
 
-  const handleScrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    })
-    if (headings[0]) {
-      setActiveId(headings[0].id)
+  const handleCopyLink = async (e: React.MouseEvent, id: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const url = `${window.location.origin}${window.location.pathname}#${id}`
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopiedId(id)
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current)
+      copyTimerRef.current = setTimeout(() => {
+        setCopiedId(null)
+      }, 2000)
+    } catch (err) {
+      console.error("Failed to copy link:", err)
     }
   }
 
@@ -153,83 +217,111 @@ export function TableOfContents({ headings, title = "On this page", className }:
 
   return (
     <nav
-      className={cn("flex flex-col gap-2.5 select-none", className)}
-      aria-label="Table of contents"
+      ref={containerRef}
+      className={cn("relative flex flex-col items-center select-none pointer-events-auto py-2", className)}
+      aria-label="Table of contents outline"
     >
-      {/* Header */}
-      <div className="flex items-center gap-1.5 px-1 text-xs font-mono font-medium uppercase tracking-wider text-muted-foreground/70 mb-1">
-        <AlignLeft className="w-3.5 h-3.5 text-primary/85 shrink-0" />
-        <span>{title}</span>
-      </div>
-
-      {/* Headings tree */}
-      <div
-        ref={tocListRef}
-        className="relative flex flex-col gap-0.5 max-h-[calc(100vh-14rem)] overflow-y-auto pr-1 -mr-1"
-        style={{
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-        }}
-      >
-        {/* Continuous vertical guide line */}
-        <div className="absolute left-[3px] top-1.5 bottom-1.5 w-px bg-border/40" />
-
+      {/* Scrubber Lines Track */}
+      <div className="flex flex-col items-center relative">
         {headings.map((heading) => {
           const isActive = activeId === heading.id
+          const isHovered = hoveredId === heading.id
           const depth = Math.max(0, heading.level - minLevel)
 
+          // Line width variations (wider & thicker lines)
+          const baseWidth = depth === 0 ? "w-[26px]" : depth === 1 ? "w-[18px]" : "w-[12px]"
+          const activeWidth = depth === 0 ? "w-[36px]" : depth === 1 ? "w-[28px]" : "w-[22px]"
+          const hoveredWidth = depth === 0 ? "w-[34px]" : depth === 1 ? "w-[26px]" : "w-[20px]"
+
+          const snippet = domSnippets[heading.id] || heading.snippet || ""
+
           return (
-            <a
+            <div
               key={heading.id}
-              data-toc-id={heading.id}
-              href={`#${heading.id}`}
+              /* Generous hover container: w-14 sm:w-16 h-7 gives plenty of horizontal and vertical hit area */
+              className="relative flex items-center justify-center w-14 sm:w-16 h-7 group cursor-pointer"
+              onMouseEnter={() => handleMouseEnterItem(heading.id)}
+              onMouseLeave={handleMouseLeaveItem}
               onClick={(e) => handleScrollTo(e, heading.id)}
-              className={cn(
-                "group relative flex items-start py-1.5 px-2 rounded-md text-left transition-all duration-150 leading-snug",
-                depth === 0 && "ml-0 text-[13px]",
-                depth === 1 && "ml-3 pl-3.5 text-xs",
-                depth >= 2 && "ml-5 pl-3.5 text-[11px]",
-                isActive
-                  ? "text-primary bg-primary/[0.08] dark:bg-primary/[0.14]"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-              )}
+              role="button"
+              tabIndex={0}
+              aria-label={`Jump to section: ${heading.text}`}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  handleScrollTo(e as unknown as React.MouseEvent, heading.id)
+                }
+              }}
             >
-              {/* Active left indicator bar - aligned with the element's indented depth */}
-              {isActive && (
-                <span
-                  className="absolute left-0 top-1 bottom-1 w-[2px] rounded-full bg-primary"
-                  aria-hidden
-                />
-              )}
+              {/* Horizontal tick line */}
+              <span
+                className={cn(
+                  "rounded-full transition-all duration-200 ease-out block pointer-events-none",
+                  isActive
+                    ? cn("bg-primary shadow-[0_0_10px_var(--primary)] h-[3.5px]", activeWidth)
+                    : isHovered
+                      ? cn("bg-foreground/85 dark:bg-neutral-200 h-0.75", hoveredWidth)
+                      : cn("bg-neutral-600/40 dark:bg-neutral-500/40 group-hover:bg-neutral-400 h-[2.5px]", baseWidth)
+                )}
+              />
 
-              {/* Nested dot indicator for sub-headings, vertically centered with text */}
-              {depth > 0 && !isActive && (
-                <span
-                  className="absolute left-1 top-[13.5px] -translate-y-1/2 w-1 h-1 rounded-full bg-border/90 group-hover:bg-muted-foreground transition-colors"
-                  aria-hidden
-                />
-              )}
+              {/* Hover Popover Card (ChatGPT Codex style) */}
+              {isHovered && (
+                <div
+                  onMouseEnter={() => handleMouseEnterItem(heading.id)}
+                  onMouseLeave={handleMouseLeaveItem}
+                  onClick={(e) => handleScrollTo(e, heading.id)}
+                  className={cn(
+                    "absolute z-50 top-1/2 -translate-y-1/2 w-72 sm:w-80 p-3.5 sm:p-4 rounded-2xl cursor-pointer text-left",
+                    "bg-neutral-900/95 dark:bg-neutral-900/95 border border-white/10 dark:border-white/10 shadow-2xl backdrop-blur-md text-white",
+                    "transition-all duration-150 animate-in fade-in-0 zoom-in-95",
+                    popoverPlacement === "right" ? "left-full ml-3" : "right-full mr-3"
+                  )}
+                  style={{
+                    boxShadow: "0 20px 35px -5px rgba(0, 0, 0, 0.4), 0 0 1px 1px rgba(255, 255, 255, 0.08)",
+                  }}
+                >
+                  {/* Subtle directional caret arrow */}
+                  <div
+                    className={cn(
+                      "absolute top-1/2 -translate-y-1/2 w-2 h-2 rotate-45 bg-neutral-900 border-white/10",
+                      popoverPlacement === "right"
+                        ? "-left-1 border-b border-l"
+                        : "-right-1 border-t border-r"
+                    )}
+                  />
 
-              <span className="line-clamp-2 break-words" title={heading.text}>
-                {heading.text}
-              </span>
-            </a>
+                  {/* Header: Title + Copy Link button */}
+                  <div className="flex items-start justify-between gap-3">
+                    <h4 className="font-semibold text-[13px] sm:text-sm tracking-tight text-neutral-100 leading-snug line-clamp-2">
+                      {heading.text}
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={(e) => handleCopyLink(e, heading.id)}
+                      title={copiedId === heading.id ? "Link copied!" : "Copy link to section"}
+                      aria-label="Copy link to section"
+                      className="p-1.5 -mr-1 -mt-1 text-neutral-400 hover:text-white hover:bg-white/10 rounded-md transition-colors shrink-0 flex items-center justify-center cursor-pointer"
+                    >
+                      {copiedId === heading.id ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      ) : (
+                        <Link2 className="w-3.5 h-3.5 hover:text-primary transition-colors" />
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Content snippet preview */}
+                  {snippet ? (
+                    <p className="mt-1.5 text-xs text-neutral-400 leading-relaxed line-clamp-3">
+                      {snippet}
+                    </p>
+                  ) : null}
+                </div>
+              )}
+            </div>
           )
         })}
-      </div>
-
-      {/* Back to top shortcut */}
-      <div className="pt-2 border-t border-border/40 px-1">
-        <button
-          onClick={handleScrollToTop}
-          className="flex items-center gap-1.5 text-[11px] font-mono text-muted-foreground/60 hover:text-foreground transition-colors cursor-pointer group"
-        >
-          <ArrowUp className="w-3 h-3 group-hover:-translate-y-0.5 transition-transform" />
-          <span>Back to top</span>
-        </button>
       </div>
     </nav>
   )
 }
-
-

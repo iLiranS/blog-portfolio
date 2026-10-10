@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useTheme } from "next-themes"
-import { Moon, Sun, Monitor, Home, FolderGit2, BookOpen, Check } from "lucide-react"
+import { Moon, Sun, Monitor, Home, ChessQueen, Newspaper, Check } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
 const navItems = [
@@ -15,12 +15,12 @@ const navItems = [
   {
     path: "/projects",
     name: "Projects",
-    icon: FolderGit2,
+    icon: ChessQueen,
   },
   {
     path: "/blog",
     name: "Blog",
-    icon: BookOpen,
+    icon: Newspaper,
   },
 ]
 

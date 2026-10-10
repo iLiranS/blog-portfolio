@@ -116,15 +116,16 @@ export interface TocItem {
   text: string
   id: string
   level: number
+  snippet?: string
 }
 
 export function extractHeadings(markdown: string): TocItem[] {
   const withoutCodeBlocks = markdown.replace(/```[\s\S]*?```/g, "")
   const lines = withoutCodeBlocks.split(/\r?\n/)
   const headings: TocItem[] = []
-  const slugCounts: Record<string, number> = {}
 
-  for (const line of lines) {
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
     let level = 0
     let text = ""
 
@@ -149,10 +150,40 @@ export function extractHeadings(markdown: string): TocItem[] {
 
       const slug = slugify(cleanText)
       if (slug) {
+        // Look ahead for preview snippet
+        let snippet = ""
+        for (let j = i + 1; j < Math.min(lines.length, i + 10); j++) {
+          const nextLine = lines[j]?.trim()
+          if (!nextLine) continue
+          if (/^(#{1,6})\s+/.test(nextLine) || /<h[1-6]/i.test(nextLine)) break
+          if (
+            nextLine.startsWith("!") ||
+            nextLine.startsWith("|") ||
+            nextLine.startsWith("---") ||
+            nextLine.startsWith("import ") ||
+            nextLine.startsWith("<")
+          ) {
+            continue
+          }
+
+          const cleanSnippet = nextLine
+            .replace(/\[([^\]]+)]\([^)]*\)/g, "$1")
+            .replace(/[*_`~]/g, "")
+            .replace(/<[^>]+>/g, "")
+            .replace(/\\(.)/g, "$1")
+            .trim()
+
+          if (cleanSnippet.length > 5) {
+            snippet = cleanSnippet.length > 160 ? cleanSnippet.slice(0, 157) + "..." : cleanSnippet
+            break
+          }
+        }
+
         headings.push({
           text: cleanText,
           id: slug,
           level,
+          snippet,
         })
       }
     }

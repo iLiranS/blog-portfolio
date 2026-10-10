@@ -61,8 +61,8 @@
 }
 
 ::selection {
-  background-color: var(--primary);
-  color: var(--background);
+  background-color: color-mix(in srgb, var(--primary) 30%, transparent);
+  color: inherit;
 }
 
 @layer base {
