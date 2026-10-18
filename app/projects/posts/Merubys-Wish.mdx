@@ -1,65 +1,67 @@
 ---
 title: "Meruby's Wish"
-publishedAt: '2026-09-29'
-summary: 'A 3D action-adventure prototype built in Godot 4, featuring a 3-layer combat pipeline, radial progression tree, procedural manga/anime environment shading, and coordinated encounter design.'
+publishedAt: '2026-10-18'
+summary: 'A 3D action-adventure prototype built in Godot 4, featuring a 5-weapon combat pipeline with global danger discharge, procedural manga environment shaders, modular quest/world architecture, and encounter loops.'
 image: '/projects/meruby/preview.webp'
 ---
 
-<video controls loop muted playsInline preload="metadata" poster="/projects/meruby/preview.webp" className="w-full rounded-xl" src="/projects/meruby/preview.mp4">
-  Your browser does not support embedded video. [View the gameplay preview](/projects/meruby/preview.mp4).
-</video>
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+  <video controls loop muted playsInline preload="metadata" poster="/projects/meruby/preview.webp" className="w-full rounded-xl" src="/projects/meruby/preview.mp4">
+    Your browser does not support embedded video. [View preview 1](/projects/meruby/preview.mp4).
+  </video>
+  <video controls loop muted playsInline preload="metadata" poster="/projects/meruby/preview2.webp" className="w-full rounded-xl" src="/projects/meruby/preview2.mp4">
+    Your browser does not support embedded video. [View preview 2](/projects/meruby/preview2.mp4).
+  </video>
+</div>
 
 > **Note:** This project is actively in development. Systems, visual styling, and balance are continuously evolving.
 
 ## Overview
 
-**Meruby's Wish** is a high-tempo 3D action combat prototype built with **Godot 4** and **Jolt Physics**. The project emphasizes responsive third-person melee and ranged combat, tight animation canceling, modular progression mechanics, and distinct stylized toon visuals.
+**Meruby's Wish** is a high-tempo 3D action combat prototype built with **Godot 4** and **Jolt Physics**. The project focuses on responsive third-person combat, animation canceling, a unified defensive discharge system, stylized cel/manga visuals, and structured boss encounters.
 
 ---
 
-## Combat & Multi-Weapon Pipeline
+## Combat & Five-Weapon System
 
-Combat is built on a clean **3-layer pipeline** designed for punchy feedback and clear build identity:
+Combat centers on responsive flow, directional knockback, and distinct weapon identities paired with a universal defensive tool:
 
-* **Innate Weapon Passives & Tier Scaling**: Four distinct weapons across emotional affinities—Verdant Katana (*Happy* / sustain & speed), Twin Pistols (*Rage* / raw damage & crit), Shock Gauntlets (*Romantic* / weakness & chain lightning), and Glacial Scythe (*Sad* / crowd-control slow). Weapons scale across Pod Tiers (T1–T3) with shifting damage multipliers and execution thresholds.
-* **Modular Attack Definitions**: Combos are authored via modular Godot resources defining 3D hitbox shapes, windup/active/recovery timings, dash-cancel windows, directional knockback, and aerial juggle mechanics.
-* **Weapon-Isolated Perfect Dodge Surges**: Timing a precise dodge triggers a brief 2.5-second burst effect that strictly matches the currently held weapon (e.g., $+50\%$ counter damage on Pistols, guaranteed shock arcs on Gauntlets, or swift heals on Katana).
-* **Skills & Ultimate Climax**: A shared ability system featuring standard 10-second cooldown skills alongside a 100% charged Climax state for devastating area-of-effect ultimates.
-
----
-
-## Progression Web
-
-Character growth centers around a radial **DAG (Directed Acyclic Graph) Progression Tree**:
-
-* **Weapon Affinity Branches**: Players spend collected essence to unlock specialized nodes across each of the 4 weapons, boosting weapon damage, critical rate/damage, elemental status potencies, and tier odds.
-* **General Vitality & Defense**: Central survival upgrades including max health scaling, Second Chance revive mechanics, and essence fortune bonuses.
-* **Strict Buff Isolation**: Weapon bonuses and status effects remain strictly tied to their respective weapon identity to prevent unintended stat cross-contamination.
+* **Global RMB Danger Discharge**: Right-click functions as a unified emergency reaction across all weapons—releasing an air-refractive supersonic shockwave that knocks back surrounding enemies while granting a 2-hit heraldic shield barrier.
+* **Five Weapon Archetypes**:
+  * **Verdant Katana (Green)**: High-speed melee combos, aerial juggles, and dash-cancel mobility.
+  * **Gravity Manipulation (Violet)**: Area control via persistent spatial orbs that form damaging polygonal cycles and launch into homing projectile barrages during Climax.
+  * **Ink Painting Brush (Black/Ink)**: Battlefield zoning with lingering ink floor stains tracked via pooled `MultiMeshInstance3D` batching, culminating in detonating ink blooms.
+  * **Glacial Staff (Blue)**: Ranged crowd control and stacking Chill that builds into full ice stasis and shattering blooms.
+  * **Sniper Rifle (Red)**: Long-range piercing lane rounds, floor knockdown traps, and focused single-target execution with Dead Eye.
+* **Perfect Dodge Counters**: Precise timing triggers weapon-tailored counter opportunities and rapid offensive turnarounds.
 
 ---
 
-## Stylized Environment Shading & Art Direction
+## World Design, Presets & Macro Loop
 
-The visual aesthetic blends anime cel-shading with expressive manga ink techniques using custom Godot spatial shaders (`environment_toon.gdshader`):
+The world architecture links modular room environments, quest states, and encounter zoning under shared primitives:
 
-* **Manga Ink Hatching & Outlines**: Procedural cross-hatching responding to dynamic light thresholds, paired with depth/normal crease edge detection for crisp illustrated outlines.
-* **Architectural & Material Roles**: Dedicated shader palettes for buildings, facades, structural framing, roofs, and modular floor tiles with localized ambient occlusion and surface weathering.
-* **Foliage & Wind Dynamics**: Vertex-animated grass and trees with stylized wind sways integrated directly into the toon lighting model.
+* **Unified Room Encounter Modes**: Seamless transition between roaming exploration, peaceful hubs, lockdown combat arenas, and surreal labyrinth trials through a modular room connection graph.
+* **Environment Presets & Architecture**: Authored environment profiles (`forest`, `ruins`, `village`, `labyrinth`) paired with custom Blender tooling for vertex-painted material palettes (facades, trims, window glass, slabs, and plinths) featuring ambient cavity occlusion and weather grime.
+* **Declarative Quest State Machine**: Decoupled quest and stage progression engines driving world flags, stage objectives, and room re-entry priority waterfalls without hardcoding scene logic.
+* **Tactical Squad Spawning**: Authors deterministic enemy groups with frontline, flank, and backline formation offsets mapped to shared combat token pools.
 
 ---
 
-## Enemy AI & Encounter Systems
+## Shaders & Art Direction
 
-Enemies provide structured, readable combat rather than chaotic group swarming:
+Visuals blend anime cel-shading with dynamic manga ink techniques:
 
-* **Token-Based Coordination**: Shared melee and ranged attack tokens prevent unfair concurrent hits, maintaining clear cadence during multi-enemy waves while allowing bosses to bypass limits.
-* **Telegraphed Hazard Patterns**: Directional strikes with hyper-armor cues, floor telegraph projections, falling AoE hazards, and procedural projectile formations (fans, spirals, and rings).
-* **Dynamic Decision Logic**: Tactical evaluation based on distance, line of sight, group cooldowns, and behavioral state machines.
+* **Manga Ink Hatching & Outlines**: Procedural cross-hatching keyed to dynamic light thresholds, complemented by depth and normal-crease detection for crisp illustrated lines.
+* **Perception Waves & Air Refraction**: Combat effects use screen-space distortion and charcoal perception waves rather than opaque glowing particles.
+* **Modular Environments & Foliage**: Dedicated spatial shaders for stylized architectural surfaces, floor tiling, and vertex-animated wind dynamics.
 
 ---
 
 ## Tech Stack
 
-* **Engine**: Godot 4.x (Forward+ Mobile/Desktop Renderer)
+* **Engine**: Godot 4.x (Forward+ Desktop / Mobile Renderer)
 * **Physics**: Godot Jolt (3D Physics)
-* **Shaders & Pipeline**: Custom spatial toon & manga shaders, VRM avatar pipeline, MToon integration
+* **Pipeline & Shaders**: Custom spatial toon & manga shaders, MToon / VRM pipeline, procedural `MultiMeshInstance3D` VFX batching
+
+
