@@ -14,12 +14,12 @@
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "geist": "1.7.2",
-    "katex": "^0.17.0",
+    "katex": "^0.19.0",
     "lucide-react": "^1.17.0",
-    "mermaid": "11.15.0",
-    "next": "16.2.7",
+    "mermaid": "^11.17.2",
+    "next": "16.4.2",
     "next-themes": "^0.4.6",
-    "postcss": "^8.5.15",
+    "postcss": "^8.5.31",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "react-markdown": "^10.1.0",
@@ -31,5 +31,14 @@
     "remark-math": "^6.0.0",
     "tailwindcss": "4.3.0",
     "typescript": "6.0.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "dompurify": ">=3.4.17",
+      "katex": ">=0.19.0",
+      "source-map-js": ">=1.2.2",
+      "baseline-browser-mapping": ">=2.11.0",
+      "postcss-selector-parser": ">=7.1.6"
+    }
   }
 }
