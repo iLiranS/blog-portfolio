@@ -221,25 +221,29 @@ export function TableOfContents({ headings, className }: TableOfContentsProps) {
       className={cn("relative flex flex-col items-center select-none pointer-events-auto py-2", className)}
       aria-label="Table of contents outline"
     >
-      {/* Scrubber Lines Track */}
+      {/* Scrubber Dots Track */}
       <div className="flex flex-col items-center relative">
-        {headings.map((heading) => {
+        {headings.map((heading, index) => {
           const isActive = activeId === heading.id
           const isHovered = hoveredId === heading.id
           const depth = Math.max(0, heading.level - minLevel)
 
-          // Line width variations (wider & thicker lines)
-          const baseWidth = depth === 0 ? "w-[26px]" : depth === 1 ? "w-[18px]" : "w-[12px]"
-          const activeWidth = depth === 0 ? "w-[36px]" : depth === 1 ? "w-[28px]" : "w-[22px]"
-          const hoveredWidth = depth === 0 ? "w-[34px]" : depth === 1 ? "w-[26px]" : "w-[20px]"
+          // Dot sizing variations based on depth, active, and hovered state
+          const dotSize = isActive
+            ? "w-2.5 h-2.5"
+            : isHovered
+              ? "w-2 h-2"
+              : depth === 0
+                ? "w-1.5 h-1.5"
+                : "w-1 h-1"
 
           const snippet = domSnippets[heading.id] || heading.snippet || ""
 
           return (
             <div
               key={heading.id}
-              /* Generous hover container: w-14 sm:w-16 h-7 gives plenty of horizontal and vertical hit area */
-              className="relative flex items-center justify-center w-14 sm:w-16 h-7 group cursor-pointer"
+              /* Compact hit area: w-8 h-4 for closer spacing between dots */
+              className="relative flex items-center justify-center w-8 h-4 group cursor-pointer"
               onMouseEnter={() => handleMouseEnterItem(heading.id)}
               onMouseLeave={handleMouseLeaveItem}
               onClick={(e) => handleScrollTo(e, heading.id)}
@@ -252,15 +256,16 @@ export function TableOfContents({ headings, className }: TableOfContentsProps) {
                 }
               }}
             >
-              {/* Horizontal tick line */}
+              {/* Dot indicator */}
               <span
                 className={cn(
                   "rounded-full transition-all duration-200 ease-out block pointer-events-none",
+                  dotSize,
                   isActive
-                    ? cn("bg-primary shadow-[0_0_10px_var(--primary)] h-[3.5px]", activeWidth)
+                    ? "bg-primary shadow-[0_0_4px_var(--primary)] scale-105"
                     : isHovered
-                      ? cn("bg-foreground/85 dark:bg-neutral-200 h-0.75", hoveredWidth)
-                      : cn("bg-neutral-600/40 dark:bg-neutral-500/40 group-hover:bg-neutral-400 h-[2.5px]", baseWidth)
+                      ? "bg-foreground/90 dark:bg-neutral-200 scale-110"
+                      : "bg-neutral-600/40 dark:bg-neutral-500/40 group-hover:bg-neutral-400"
                 )}
               />
 
@@ -290,24 +295,29 @@ export function TableOfContents({ headings, className }: TableOfContentsProps) {
                     )}
                   />
 
-                  {/* Header: Title + Copy Link button */}
+                  {/* Header: Title + [Index / Total] + Copy Link button */}
                   <div className="flex items-start justify-between gap-3">
                     <h4 className="font-semibold text-[13px] sm:text-sm tracking-tight text-neutral-100 leading-snug line-clamp-2">
                       {heading.text}
                     </h4>
-                    <button
-                      type="button"
-                      onClick={(e) => handleCopyLink(e, heading.id)}
-                      title={copiedId === heading.id ? "Link copied!" : "Copy link to section"}
-                      aria-label="Copy link to section"
-                      className="p-1.5 -mr-1 -mt-1 text-neutral-400 hover:text-white hover:bg-white/10 rounded-md transition-colors shrink-0 flex items-center justify-center cursor-pointer"
-                    >
-                      {copiedId === heading.id ? (
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
-                      ) : (
-                        <Link2 className="w-3.5 h-3.5 hover:text-primary transition-colors" />
-                      )}
-                    </button>
+                    <div className="flex items-center gap-1.5 shrink-0 -mr-1 -mt-1">
+                      <span className="text-[11px] font-mono text-neutral-400 select-none px-1 py-0.5 rounded bg-white/5 border border-white/5">
+                        {index + 1}/{headings.length}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => handleCopyLink(e, heading.id)}
+                        title={copiedId === heading.id ? "Link copied!" : "Copy link to section"}
+                        aria-label="Copy link to section"
+                        className="p-1.5 text-neutral-400 hover:text-white hover:bg-white/10 rounded-md transition-colors flex items-center justify-center cursor-pointer"
+                      >
+                        {copiedId === heading.id ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : (
+                          <Link2 className="w-3.5 h-3.5 hover:text-primary transition-colors" />
+                        )}
+                      </button>
+                    </div>
                   </div>
 
                   {/* Content snippet preview */}

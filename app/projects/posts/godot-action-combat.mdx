@@ -1,67 +1,43 @@
 ---
-title: "Godot 3D Combat Prototype"
+title: "Godot 3D Systems & Shaders"
 publishedAt: '2026-10-18'
-summary: 'A 3D action-adventure prototype built in Godot 4, featuring a 5-weapon combat pipeline with global danger discharge, procedural manga environment shaders, modular quest/world architecture, and encounter loops.'
+summary: 'Explorations in Godot 4: stylized watercolor diorama rendering, custom tilt-shift DoF, painterly foliage shaders, and spatial chunking performance.'
 image: '/projects/godot-action-combat/preview.webp'
 ---
 
-<div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+<div className="my-6">
   <video controls loop muted playsInline preload="metadata" poster="/projects/godot-action-combat/preview.webp" className="w-full rounded-xl" src="/projects/godot-action-combat/preview.mp4">
-    Your browser does not support embedded video. [View preview 1](/projects/godot-action-combat/preview.mp4).
-  </video>
-  <video controls loop muted playsInline preload="metadata" poster="/projects/godot-action-combat/preview2.webp" className="w-full rounded-xl" src="/projects/godot-action-combat/preview2.mp4">
-    Your browser does not support embedded video. [View preview 2](/projects/godot-action-combat/preview2.mp4).
+    Your browser does not support embedded video. [View preview](/projects/godot-action-combat/preview.mp4).
   </video>
 </div>
 
-> **Note:** This project is actively in development. Systems, visual styling, and balance are continuously evolving.
+> **Note:** An ongoing sandbox for custom shaders, rendering techniques, and engine architecture in Godot 4.
 
 ## Overview
 
-**Godot 3D Combat Prototype** is a high-tempo 3D action combat prototype built with **Godot 4** and **Jolt Physics**. The project focuses on responsive third-person combat, animation canceling, a unified defensive discharge system, stylized cel/manga visuals, and structured boss encounters.
+A technical playground built in **Godot 4** focused on stylized 3D graphics, procedural environment shaders, and diorama level architecture.
 
 ---
 
-## Combat & Five-Weapon System
+## Art Direction & Shaders
 
-Combat centers on responsive flow, directional knockback, and distinct weapon identities paired with a universal defensive tool:
-
-* **Global RMB Danger Discharge**: Right-click functions as a unified emergency reaction across all weapons—releasing an air-refractive supersonic shockwave that knocks back surrounding enemies while granting a 2-hit heraldic shield barrier.
-* **Five Weapon Archetypes**:
-  * **Verdant Katana (Green)**: High-speed melee combos, aerial juggles, and dash-cancel mobility.
-  * **Gravity Manipulation (Violet)**: Area control via persistent spatial orbs that form damaging polygonal cycles and launch into homing projectile barrages during Climax.
-  * **Ink Painting Brush (Black/Ink)**: Battlefield zoning with lingering ink floor stains tracked via pooled `MultiMeshInstance3D` batching, culminating in detonating ink blooms.
-  * **Glacial Staff (Blue)**: Ranged crowd control and stacking Chill that builds into full ice stasis and shattering blooms.
-  * **Sniper Rifle (Red)**: Long-range piercing lane rounds, floor knockdown traps, and focused single-target execution with Dead Eye.
-* **Perfect Dodge Counters**: Precise timing triggers weapon-tailored counter opportunities and rapid offensive turnarounds.
+* **Watercolor Toon Pipeline**: Warm cream paper bases with three-tone toon shading, cool lavender-slate shadow glazes, and capillary edge darkening simulating pigment pooling.
+* **Tilt-Shift & Camera Rig**: Low-FOV telephoto camera rig featuring fast box-blur depth-of-field for a miniature diorama aesthetic.
+* **Painterly Foliage & Atmosphere**: Layered ribbon grass clumps with root-to-tip wind sway, translucent gradient water, and GPU-accelerated ambient motes drifting with global wind vectors.
+* **Deckle-Edge Perimeter**: Procedural edge wash that dissolves room boundaries directly into paper voids.
 
 ---
 
-## World Design, Presets & Macro Loop
+## Engine & Performance
 
-The world architecture links modular room environments, quest states, and encounter zoning under shared primitives:
-
-* **Unified Room Encounter Modes**: Seamless transition between roaming exploration, peaceful hubs, lockdown combat arenas, and surreal labyrinth trials through a modular room connection graph.
-* **Environment Presets & Architecture**: Authored environment profiles (`forest`, `ruins`, `village`, `labyrinth`) paired with custom Blender tooling for vertex-painted material palettes (facades, trims, window glass, slabs, and plinths) featuring ambient cavity occlusion and weather grime.
-* **Declarative Quest State Machine**: Decoupled quest and stage progression engines driving world flags, stage objectives, and room re-entry priority waterfalls without hardcoding scene logic.
-* **Tactical Squad Spawning**: Authors deterministic enemy groups with frontline, flank, and backline formation offsets mapped to shared combat token pools.
-
----
-
-## Shaders & Art Direction
-
-Visuals blend anime cel-shading with dynamic manga ink techniques:
-
-* **Manga Ink Hatching & Outlines**: Procedural cross-hatching keyed to dynamic light thresholds, complemented by depth and normal-crease detection for crisp illustrated lines.
-* **Perception Waves & Air Refraction**: Combat effects use screen-space distortion and charcoal perception waves rather than opaque glowing particles.
-* **Modular Environments & Foliage**: Dedicated spatial shaders for stylized architectural surfaces, floor tiling, and vertex-animated wind dynamics.
+* **Spatial Chunking**: $8\times8$ grid chunking ($16\text{m} \times 16\text{m}$) enabling automatic frustum culling of $85\text{--}95\%$ of offscreen geometry.
+* **Physics & Collider Batching**: Modular static colliders grouped per chunk with decoupled overhead camera occluders.
+* **VRM / MToon Workflow**: Custom character shading adapted to environment lighting and shadow palettes.
 
 ---
 
 ## Tech Stack
 
-* **Engine**: Godot 4.x (Forward+ Desktop / Mobile Renderer)
-* **Physics**: Godot Jolt (3D Physics)
-* **Pipeline & Shaders**: Custom spatial toon & manga shaders, MToon / VRM pipeline, procedural `MultiMeshInstance3D` VFX batching
-
-
+* **Engine**: Godot 4.x (Forward+ / Forward Mobile)
+* **Physics**: Godot Jolt
+* **Shaders**: Custom spatial toon & watercolor shaders, GPU `MultiMeshInstance3D` particle batching
