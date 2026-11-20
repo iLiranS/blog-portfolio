@@ -176,19 +176,22 @@ export function Navbar() {
                   linkRefs.current[index] = el
                 }}
                 href={path}
+                aria-label={name}
+                title={name}
                 className={`relative z-10 inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-sm font-medium border border-transparent transition-colors duration-200 ${isActive
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/8"
                   }`}
               >
-                <Icon className="h-4 w-4" />
-                <span>{name}</span>
+                <Icon className="h-4 w-4 shrink-0" />
+                <span className={isActive ? "inline" : "hidden sm:inline"}>{name}</span>
               </Link>
             )
           })}
         </div>
 
         <div className="flex items-center gap-0.5 sm:gap-1">
+          <span aria-hidden="true" className="mx-1 h-4 w-px bg-black/10 dark:bg-white/12 shrink-0 sm:hidden" />
           <a
             href="https://github.com/iLiranS"
             target="_blank"
