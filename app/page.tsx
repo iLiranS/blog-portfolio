@@ -1,5 +1,4 @@
 import BlogPosts from "app/components/posts"
-import Footer from "./components/footer"
 import ProjectPosts from "./components/projects"
 
 export default function Page() {
@@ -18,19 +17,32 @@ export default function Page() {
             <h1 className="text-3xl font-extrabold tracking-tight bg-linear-to-r from-primary via-[#6366F1] to-[#4169E1] bg-clip-text text-transparent sm:text-4xl animate-text-gradient bg-size-[200%_auto]">
               LiranS
             </h1>
-            {/* Badge with pulsing status dot */}
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
-              <span className="relative flex h-1.5 w-1.5">
+            {/* Liquid Glass badge with pulsing status dot and specular shimmer */}
+            <span className="liquid-glass-pill relative inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold text-primary backdrop-blur-md overflow-hidden select-none shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_4px_16px_-4px_color-mix(in_oklab,var(--primary)_25%,transparent)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.22),0_4px_20px_-4px_color-mix(in_oklab,var(--primary)_30%,transparent)]">
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 left-0 w-1/2 bg-linear-to-r from-transparent via-white/50 dark:via-white/20 to-transparent animate-glass-shimmer"
+              />
+              <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary shadow-[0_0_8px_var(--primary)]" />
               </span>
-              Available for hire
+              <span className="relative">Available for hire</span>
             </span>
           </div>
 
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-xl">
-            I'm a <strong className="font-semibold text-foreground">Full-Stack Developer</strong> 🧑‍💻 who loves
-            experimenting 🧪
+            I&apos;m a <strong className="font-semibold text-foreground">Full-Stack Developer</strong> 🧑‍💻 who loves
+            experimenting{" "}
+            <span
+              className="relative inline-flex items-center justify-center align-baseline select-none pr-2"
+              aria-hidden="true"
+            >
+              <span className="animate-beaker-pour">🧪</span>
+              <span className="animate-spill-drop-1 pointer-events-none absolute top-1/2 right-1 h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.75)]" />
+              <span className="animate-spill-drop-2 pointer-events-none absolute top-1/2 right-0.5 h-1 w-1 rounded-full bg-emerald-300 shadow-[0_0_5px_rgba(110,231,183,0.75)]" />
+              <span className="animate-spill-puddle pointer-events-none absolute -bottom-0.5 -right-0.5 h-0.5 w-2.5 rounded-full bg-emerald-400/80 blur-[0.5px]" />
+            </span>
           </p>
         </div>
       </div>
@@ -72,8 +84,6 @@ export default function Page() {
         </div>
         <BlogPosts amount={4} />
       </div>
-
-      <Footer />
     </section>
   )
 }

@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation"
 import MarkdownRenderer from "app/components/markdown"
-import { ScrollProgress } from "app/components/scroll-progress"
-import { TableOfContents } from "app/components/table-of-contents"
+import { TableOfContents, MobileTableOfContents } from "app/components/table-of-contents"
 import { formatDate, getProjectPosts, extractHeadings, getReadTime } from "app/blog/utils"
 import { baseUrl } from "app/sitemap"
 import Link from "next/link"
-import { Calendar, Clock, ArrowLeft, ArrowRight, RotateCw } from "lucide-react"
+import { Calendar, Clock, RotateCw } from "lucide-react"
+import { PostNavigation } from "app/components/post-navigation"
 
 interface ProjectPageProps {
   params: Promise<{
@@ -76,7 +76,6 @@ export default async function Projects({ params }: ProjectPageProps) {
 
   return (
     <>
-      <ScrollProgress />
       <div className="relative">
         {/* Schema Markup */}
         <script
@@ -117,21 +116,21 @@ export default async function Projects({ params }: ProjectPageProps) {
               {post.metadata.title}
             </h1>
             <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-muted-foreground font-mono">
-              <span className="flex items-center gap-1.5 rounded-full bg-muted/50 border border-border/30 px-3 py-1">
+              <span className="liquid-glass-pill flex items-center gap-1.5 rounded-full px-3 py-1 text-foreground/85">
                 <Calendar className="h-3.5 w-3.5 text-primary shrink-0" />
                 <time dateTime={post.metadata.publishedAt}>
                   {formatDate(post.metadata.publishedAt)}
                 </time>
               </span>
               {post.metadata.updatedAt && (
-                <span className="flex items-center gap-1.5 rounded-full bg-muted/50 border border-border/30 px-3 py-1">
+                <span className="liquid-glass-pill flex items-center gap-1.5 rounded-full px-3 py-1 text-foreground/85">
                   <RotateCw className="h-3 w-3 text-primary shrink-0" />
                   <time dateTime={post.metadata.updatedAt}>
                     Updated {formatDate(post.metadata.updatedAt)}
                   </time>
                 </span>
               )}
-              <span className="flex items-center gap-1.5 rounded-full bg-muted/50 border border-border/30 px-3 py-1">
+              <span className="liquid-glass-pill flex items-center gap-1.5 rounded-full px-3 py-1 text-foreground/85">
                 <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
                 <span>{readTime} min read</span>
               </span>
@@ -147,6 +146,11 @@ export default async function Projects({ params }: ProjectPageProps) {
             </aside>
           )}
 
+          {/* Optional compact Mobile Table of Contents (enabled via `toc: true` in MDX frontmatter) */}
+          {post.metadata.toc && headings.length > 0 && (
+            <MobileTableOfContents headings={headings} />
+          )}
+
           {/* Main Prose Content */}
           <div className="w-full">
             <MarkdownRenderer content={post.content} />
@@ -156,39 +160,12 @@ export default async function Projects({ params }: ProjectPageProps) {
         <hr className="my-8 border-border/40" />
 
         {/* Navigation Links */}
-        <div className="flex flex-col sm:flex-row justify-between gap-4 mt-8">
-          {prevPost ? (
-            <Link
-              href={`/projects/${prevPost.slug}`}
-              className="group flex flex-col gap-1.5 p-3 rounded-xl border border-border/40 hover:border-primary/30 bg-card-background hover:bg-muted/30 transition-[transform] duration-300 sm:w-1/2"
-            >
-              <span className="text-[10px] font-bold uppercase tracking-wider text-primary group-hover:text-primary flex items-center gap-1">
-                <ArrowLeft className="h-3 w-3" /> Previous Project
-              </span>
-              <span className="font-semibold text-sm text-foreground group-hover:underline">
-                {prevPost.metadata.title}
-              </span>
-            </Link>
-          ) : (
-            <div className="hidden sm:block sm:w-1/2" />
-          )}
-
-          {nextPost ? (
-            <Link
-              href={`/projects/${nextPost.slug}`}
-              className="group flex flex-col gap-1.5 p-3 rounded-xl border border-border/40 hover:border-primary/30 bg-card-background hover:bg-muted/30 transition-[transform] duration-300 sm:w-1/2 items-end text-right"
-            >
-              <span className="text-[10px] font-bold text-primary uppercase tracking-wider  group-hover:text-primary flex items-center gap-1">
-                Next Project <ArrowRight className="h-3 w-3" />
-              </span>
-              <span className="font-semibold text-sm text-foreground group-hover:underline">
-                {nextPost.metadata.title}
-              </span>
-            </Link>
-          ) : (
-            <div className="hidden sm:block sm:w-1/2" />
-          )}
-        </div>
+        <PostNavigation
+          basePath="/projects"
+          label="Project"
+          prevPost={prevPost}
+          nextPost={nextPost}
+        />
       </div>
     </>
   )

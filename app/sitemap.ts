@@ -1,7 +1,7 @@
 import { getBlogPosts, getProjectPosts } from 'app/blog/utils'
 import type { MetadataRoute } from 'next'
 
-export const baseUrl = 'https://www.lirans.online'
+export const baseUrl = 'https://lirans.vercel.app'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const today = new Date().toISOString().split('T')[0]

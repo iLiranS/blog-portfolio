@@ -7,6 +7,7 @@ type Metadata = {
   updatedAt?: string
   summary: string
   image?: string
+  toc?: boolean
 }
 
 function parseFrontmatter(fileContent: string) {
@@ -15,13 +16,18 @@ function parseFrontmatter(fileContent: string) {
   let frontMatterBlock = match![1]
   let content = fileContent.replace(frontmatterRegex, "").trim()
   let frontMatterLines = frontMatterBlock.trim().split("\n")
-  let metadata: Partial<Metadata> = {}
+  let metadata: Partial<Metadata> = { toc: true }
 
   frontMatterLines.forEach((line) => {
     let [key, ...valueArr] = line.split(": ")
     let value = valueArr.join(": ").trim()
     value = value.replace(/^['"](.*)['"]$/, "$1") // Remove quotes
-    metadata[key.trim() as keyof Metadata] = value
+    let trimmedKey = key.trim() as keyof Metadata
+    if (trimmedKey === "toc") {
+      metadata.toc = value.toLowerCase() !== "false"
+    } else {
+      metadata[trimmedKey] = value
+    }
   })
 
   // Extract first markdown image as preview if not present in frontmatter
