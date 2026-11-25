@@ -1,0 +1,47 @@
+---
+title: 'Aurelia — 3D MIDI Piano Visualizer & Practice Studio'
+publishedAt: '2026-11-25'
+summary: 'A fast, native desktop MIDI piano visualizer and practice studio built with Tauri 2, Rust, React 19, and Three.js.'
+image: '/projects/aurelia/preview.webp'
+---
+
+![Aurelia 3D Piano Waterfall Preview](/projects/aurelia/preview.webp)
+
+**Aurelia** is a native desktop MIDI piano visualizer and practice studio designed for smooth 60fps rendering, low-latency SoundFont synthesis, and distraction-free daily practice.
+
+🔗 **[View on GitHub](https://github.com/iLiranS/Aurelia)**
+
+---
+
+## ✨ Overview
+
+Most MIDI visualizers are either heavy browser apps with audio lag or dated desktop utilities. Aurelia pairs a **Rust** audio and MIDI backend with a **Three.js (React Three Fiber)** 3D stage inside **Tauri 2**, keeping hardware input, synthesis, and rendering fast and self-contained.
+
+---
+
+## 🚀 Key Features
+
+### 🎹 3D Stage & Visuals
+- **60fps Instanced Waterfall & 88-Key Piano**: WebGL rendering with custom shaders, selective bloom, hit-glow particles, and key depression physics.
+- **Note Labels & Measure Lines**: Optional pitch labels on falling notes and keys, plus instanced measure lines parsed directly from MIDI time signatures.
+- **Customizable Themes**: Personalize stage colors, hand palettes, and visual effects from the in-app Appearance & Studio popover.
+
+### 🔊 Native Rust Audio & MIDI
+- **Low-Latency SoundFont Synthesis**: Powered by `cpal` and `rustysynth` with studio reverb, touch presets, and the bundled `SalamanderGrandPiano-V3-Lite.sf2` (plus custom `.sf2` import).
+- **Plug-and-Play Hardware MIDI**: Automatic USB MIDI detection via `midir` with direct Rust-to-Rust audio routing, sustain pedal (`CC64`) support, and range dimming for `25`–`88` key controllers.
+- **Offline Audio Export**: Render MIDI pieces or live recordings directly to **WAV** (`hound`) or **MP3** (`mp3lame-encoder`).
+
+### 🎯 Study Mode & Practice Tools
+- **Wait-for-Input Mode**: Pauses the waterfall at the hit line until you play the expected note(s), with chord grouping, early-hit forgiveness, and auto-skipping for out-of-range notes on compact keyboards.
+- **Hand Separation & Looping**: Practice Left, Right, or Both Hands with per-track hand assignment, configurable pitch split, `0.25x–2.0x` tempo scaling, non-destructive transposition, **A–B loops**, and count-in.
+
+### 🎙️ Free Play, Recording & Library
+- **Free Play & Recording Studio**: Open the stage without a MIDI file with a built-in metronome, capture live performances, and save or export recordings.
+- **Folder-Watched MIDI Library**: Persistent SQLite-backed library (`rusqlite`) with `blake3` indexing, hover audio previews, drag-and-drop importing, and customizable shortcuts (`⌘/`).
+
+---
+
+## 🛠️ Tech Stack
+
+- **Desktop Shell & Backend**: Tauri 2, Rust (`cpal`, `rustysynth`, `midir`, `midly`, `rusqlite`, `blake3`, `hound`, `mp3lame-encoder`)
+- **Frontend & 3D**: React 19, TypeScript, Three.js / React Three Fiber (`@react-three/fiber`, `@react-three/drei`), Zustand, Tailwind CSS, Radix UI
